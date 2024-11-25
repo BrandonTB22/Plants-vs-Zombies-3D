@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plants Vs Zombies</title>
+</head>
+<body>
+
+    <canvas id="myCanvas"></canvas>
+
+    <script type="module">
+// Inclide all of the imports needed
+import * as THREE from 'three';
+import {Lawn} from './Lawn.js';
+
+// Set up the camera, scene, and renderer
+var scene = new THREE.Scene();
+
+var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, .1, 3000 );
+camera.position.set(30, 50, 80)
+camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
+scene.add( camera );
+
+var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
+renderer.setClearColor(0x000000);
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+
+var light = new THREE.AmbientLight(0xffffff);
+scene.add(light);
+
+// Texture Loader
+var texLoader = new THREE.TextureLoader();
+var grass1 = texLoader.load('Textures/grass1.jpg');
+var grass2 = texLoader.load('Textures/grass2.jpg');
+
+var lawn = new Lawn(grass1, grass2, 8, 8, 8);
+var lawnGeneration = lawn.generateLawn();
+
+for (let i = 0; i < lawnGeneration.length; i++){
+    scene.add(lawnGeneration[i]);
+}
+
+
+
+// Animate every frame
+function animate(){
+
+    requestAnimationFrame(animate);
+    renderer.render( scene, camera );
+}
+
+// Call animate function
+animate();
+    </script>
+</body>
+</html>
