@@ -1,23 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plants Vs Zombies</title>
+    <style>
+        body{
+            margin: 0;
+            overflow: hidden;
+        }
+        #startButton {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px 40px;
+            font-size: 24px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        #startButton:hover {
+            background-color: #444;
+        }
+        
+    </style>
 </head>
 <body>
 
+    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
+    <button id="startButton">Begin Game</button>
+    
     <canvas id="myCanvas"></canvas>
 
     <script type="module">
 // Inclide all of the imports needed
 import * as THREE from 'three';
 import {Lawn} from './Lawn.js';
+import {House} from './House.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
 
 var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, .1, 3000 );
-camera.position.set(30, 50, 80)
-camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
+camera.position.set(30, 20, -15);
+camera.lookAt( new THREE.Vector3(30, 0, 15));
 scene.add( camera );
 
 var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
@@ -28,13 +58,50 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 
+// Handle the start button being clicked
+const startButton = document.getElementById('startButton');
+startButton.addEventListener('click', () => {
+    startButton.style.display = 'none'; // Hide the button after it has been clicked
+
+    camera.position.set(30, 50, 80);
+    camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
+    // Play start sound effect
+
+    //l
+
+});
+
+// Test plant
+const modelLoader = new GLTFLoader();
+modelLoader.load('peashooter.glb',
+        (gltf) => {
+            const model = gltf.scene;
+            scene.add(model);
+
+            model.position.set(0, 5, 0);
+            model.scale.set(10, 10, 10);
+            model.rotateY(1.5);
+        },
+            (xhr) => {
+                console.log('Model ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded')
+        },
+            (error) => {
+                console.log('There was an error:', error);
+        });
+
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
 var grass1 = texLoader.load('Textures/grass1.jpg');
 var grass2 = texLoader.load('Textures/grass2.jpg');
 
+// Add the lawn to the scene
 var lawn = new Lawn(grass1, grass2, 8, 8, 8);
 var lawnGeneration = lawn.generateLawn();
+
+// Add the house to the scene
+var house = new House([64, 8, 64], 0xdbd6c8, [-36, 0, 16]);
+var houseGeneration = house.generateHouse();
+scene.add(houseGeneration);
 
 for (let i = 0; i < lawnGeneration.length; i++){
     scene.add(lawnGeneration[i]);
