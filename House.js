@@ -1,6 +1,6 @@
 // A class to represent the house in Plants vs Zombies
 
-import * as THREE from 'three';
+import THREE from './threejsModule.js';
 
 let house, window, door, roof, base;
 

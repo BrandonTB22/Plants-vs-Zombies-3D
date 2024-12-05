@@ -36,18 +36,21 @@
     <canvas id="myCanvas"></canvas>
 
     <script type="module">
-// Inclide all of the imports needed
-import * as THREE from 'three';
+// Include all of the imports needed
+import THREE from './threejsModule.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import {Plant} from './Plants/Plant.js';
+import {Peashooter} from './Plants/Peashooter.js';
+import {SpawnLocation} from './Zombies/SpawnLocation.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
 
 var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, .1, 3000 );
-camera.position.set(30, 20, -15);
-camera.lookAt( new THREE.Vector3(30, 0, 15));
+camera.position.set(30, 30, -15);
+camera.lookAt( new THREE.Vector3(30, -10, 15));
 scene.add( camera );
 
 var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
@@ -71,11 +74,13 @@ startButton.addEventListener('click', () => {
 
 });
 
+/*
 // Test plant
+let model;
 const modelLoader = new GLTFLoader();
 modelLoader.load('peashooter.glb',
         (gltf) => {
-            const model = gltf.scene;
+            model = gltf.scene;
             scene.add(model);
 
             model.position.set(0, 5, 0);
@@ -88,6 +93,15 @@ modelLoader.load('peashooter.glb',
             (error) => {
                 console.log('There was an error:', error);
         });
+
+*/
+
+var peashooter = new Peashooter('peashooter', 100);
+var generatePeashooter = peashooter.generatePlant();
+var generatePeashooterDetection = peashooter.generateDetectionZone();
+scene.add(generatePeashooter);
+scene.add(generatePeashooterDetection);
+
 
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
@@ -102,6 +116,12 @@ var lawnGeneration = lawn.generateLawn();
 var house = new House([64, 8, 64], 0xdbd6c8, [-36, 0, 16]);
 var houseGeneration = house.generateHouse();
 scene.add(houseGeneration);
+
+// Add the zombie spawn location to the scene
+var spawn = new SpawnLocation();
+var generateSpawn = spawn.generateSpawnLocation();
+scene.add(generateSpawn);
+
 
 for (let i = 0; i < lawnGeneration.length; i++){
     scene.add(lawnGeneration[i]);
