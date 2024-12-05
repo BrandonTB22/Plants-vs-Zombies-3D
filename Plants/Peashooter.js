@@ -1,3 +1,4 @@
+import { Vector3 } from "three/src/Three.js";
 import THREE from "../threejsModule";
 import {Plant} from './Plant.js';
 
@@ -13,12 +14,9 @@ class Peashooter extends Plant{
         this.modle = modle;
         
     }
-
- 
-
+    
     generatePlant(){
         // Using a basic box for now
-
         let boxGeo = new THREE.BoxGeometry(3, 6, 3);
         let material = new THREE.MeshStandardMaterial({ color : 0x00ff00});
         peashooter = new THREE.Mesh(boxGeo, material);
@@ -28,14 +26,12 @@ class Peashooter extends Plant{
     }
 
     generateDetectionZone(){
-        let lawnSize = this.getLawnSize();
-        let boxGeo = new THREE.BoxGeometry(30, 1, 1);
-        let material = new THREE.MeshStandardMaterial({color : 0xffffff});
-        let detectionBox = new THREE.Mesh(boxGeo, material);
-        detectionBox.position.set(peashooter.position.x + 5, peashooter.position.y + 2, 0);
+        const material = new THREE.LineBasicMaterial({color : 0xffffff});
+        const points = [new THREE.Vector3(peashooter.position.x, peashooter.position.y + 2, peashooter.position.z), new THREE.Vector3(this.lawnSizeX, peashooter.position.y + 2, peashooter.position.z)];
+        const geo = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geo, material);
 
-        return detectionBox;
-
+        return line;
     }
 
     generatePeas(){
