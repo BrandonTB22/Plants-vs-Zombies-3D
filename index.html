@@ -44,6 +44,7 @@ import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
+import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -127,17 +128,28 @@ for (let i = 0; i < lawnGeneration.length; i++){
     scene.add(lawnGeneration[i]);
 }
 
+let updateAnimation; // This will hold the animation update function
+const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
 
+// Load the zombie model and get the animation update function
+loadBasicZombie(scene).then((updateFn) => {
+    updateAnimation = updateFn; // Assign the update function when the promise resolves
+}).catch((error) => {
+    console.error("Error loading the zombie:", error);
+});
 
-// Animate every frame
-function animate(){
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate); // Request the next frame
 
-    requestAnimationFrame(animate);
-    renderer.render( scene, camera );
+    const delta = clock.getDelta(); // Get the time delta for the frame
+    if (updateAnimation) updateAnimation(delta); // Call the update function if available
+
+    renderer.render(scene, camera); // Render the scene
 }
 
-// Call animate function
-animate();
+animate(); // Start the animation loop
+
     </script>
 </body>
 </html>
