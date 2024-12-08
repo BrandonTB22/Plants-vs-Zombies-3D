@@ -132,6 +132,7 @@ import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
+import {BasicZombie} from './Zombies/BasicZombie.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
@@ -186,13 +187,21 @@ modelLoader.load('peashooter.glb',
         });
 
 */
-
+// Add a peashooter in
 var peashooter = new Peashooter('peashooter', 100);
 var generatePeashooter = peashooter.generatePlant();
 var generatePeashooterDetection = peashooter.generateDetectionZone();
 scene.add(generatePeashooter);
 scene.add(generatePeashooterDetection);
 
+// Add the zombie
+var zombie = new BasicZombie('basicZombie', 100);
+var generateBasicZombie = zombie.generateZombie();
+var zomBox = zombie.createBoundingBox();
+scene.add(generateBasicZombie);
+
+console.log(zomBox);
+peashooter.detectIntersection(zomBox);
 
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
