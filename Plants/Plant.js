@@ -18,6 +18,10 @@ class Plant{
 
     }
 
+    detectIntersection(){
+        
+    }
+
 
 }
 
