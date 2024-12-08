@@ -30,6 +30,96 @@
 </head>
 <body>
 
+    <div id="gui">
+        <div id="sunEnergy">
+            <span id="sunText">0</span>
+        </div>
+        <div id="plantSlots">
+            <!-- Plant slots -->
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+        </div>
+        <div id="shovel">
+            <img src="shovel_icon.png" alt="Shovel" />
+        </div>
+    </div>
+    <style>
+        /* GUI Container */
+        #gui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+            border: 2px solid #555;
+            border-radius: 10px;
+            padding: 10px;
+            width: 400px; /* Adjust as needed */
+            height: 60px;
+        }
+    
+        /* Sun Energy Circle */
+        #sunEnergy {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ffcc00; /* Sun yellow */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            margin-right: 10px;
+            box-shadow: 0px 0px 10px 2px #ffcc00;
+        }
+    
+        #sunText {
+            user-select: none; /* Prevent text selection */
+        }
+    
+        /* Plant Seed Boxes */
+        #plantSlots {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr); /* 8 equally spaced columns */
+            gap: 5px;
+            margin-right: 10px;
+        }
+    
+        .plantBox {
+            width: 40px;
+            height: 40px;
+            background-color: #228B22; /* Green for empty slot */
+            border: 2px solid #fff;
+            border-radius: 5px;
+        }
+    
+        /* Shovel Icon */
+        #shovel {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #888; /* Neutral color for shovel */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+    
+        #shovel img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
     <button id="startButton">Begin Game</button>
     
@@ -45,6 +135,7 @@ import {Peashooter} from './Plants/Peashooter.js';
 import {BasicZombie} from './Zombies/BasicZombie.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
+import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -136,17 +227,28 @@ for (let i = 0; i < lawnGeneration.length; i++){
     scene.add(lawnGeneration[i]);
 }
 
+let updateAnimation; // This will hold the animation update function
+const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
 
+// Load the zombie model and get the animation update function
+loadBasicZombie(scene).then((updateFn) => {
+    updateAnimation = updateFn; // Assign the update function when the promise resolves
+}).catch((error) => {
+    console.error("Error loading the zombie:", error);
+});
 
-// Animate every frame
-function animate(){
+// Animation loop
+function animate() {
+    requestAnimationFrame(animate); // Request the next frame
 
-    requestAnimationFrame(animate);
-    renderer.render( scene, camera );
+    const delta = clock.getDelta(); // Get the time delta for the frame
+    if (updateAnimation) updateAnimation(delta); // Call the update function if available
+
+    renderer.render(scene, camera); // Render the scene
 }
 
-// Call animate function
-animate();
+animate(); // Start the animation loop
+
     </script>
 </body>
 </html>
