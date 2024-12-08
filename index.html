@@ -32,7 +32,8 @@
 
     <div id="gui">
         <div id="sunEnergy">
-            <span id="sunText">50</span>
+
+            <h3 id="sunText">1000</h3>
         </div>
         <div id="plantSlots">
             <!-- Plant slots -->
@@ -63,6 +64,7 @@
             padding: 10px;
             width: 550px; /* Adjust as needed */
             height: 60px;
+            
         }
     
         /* Sun Energy Circle */
@@ -147,9 +149,8 @@ let raycasting = false;
 const raycaster = new THREE.Raycaster();
 const plantImages = ['./Textures/Peashooter_Seed_Packet.jpg'];
 const boxes = document.querySelectorAll('.plantBox');
-
-// Main menu music
-// var menuMusic
+let selectedPlant = false;
+let plants = [];
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -167,6 +168,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 
+// Update the sun count when planted
+function updateSunCount(amount){
+    const text = document.getElementById('sunText');
+
+    text.textContent = text.textContent - amount;
+}
+
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -175,6 +183,7 @@ camera.add(listener);
 const audioLoader = new THREE.AudioLoader();
 const levelMusic = new THREE.Audio(listener);
 const soundEffect1 = new THREE.Audio(listener);
+const soundEffect2 = new THREE.Audio(listener);
 
 audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     levelMusic.setBuffer(buffer);
@@ -192,15 +201,27 @@ boxes.forEach((box, index) => {
     console.log(`Box ${index + 1} clicked!`);
     raycasting = true;
 
+    switch (index + 1) {
+        case 1:
+            console.log("Peashooter Selected");
+            let peashooter = new Peashooter('peashooter', null, 100, 100);
+            plants.push(peashooter);
+
+            break;
+    
+        default:
+            break;
+    }
+
     audioLoader.load('./SoundFiles/seedSelect.mp3', (buffer) => {
         soundEffect1.setBuffer(buffer);
         soundEffect1.setLoop(false);
         soundEffect1.setVolume(1);
         soundEffect1.play();
-});
-
-
+    });
   })
+
+  
 });
 
 
@@ -212,26 +233,7 @@ startButton.addEventListener('click', () => {
     levelMusic.play();
     camera.position.set(30, 50, 80);
     camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
-    // Play start sound effect
-
-    
-
 });
-
-
-// Add a peashooter in (test)
-var peashooter = new Peashooter('peashooter', 100);
-var generatePeashooter = peashooter.generatePlant();
-var generatePeashooterDetection = peashooter.generateDetectionZone();
-var generatePea = peashooter.generatePeas();
-console.log(generatePea.length);
-
-for (let i = 0; i < generatePea.length; i++){
-    scene.add(generatePea[i]);
-    generatePea[i].visible = false;
-}
-
-scene.add(generatePeashooter);
 
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
@@ -277,10 +279,10 @@ loadBasicZombie(scene).then((updateFn) => {
     console.error("Error loading the zombie:", error);
 });
 
-
-
 // Mouse movements 
 const mouse = new THREE.Vector2();
+const plane = new THREE.Plane(new THREE.Vector3(0, 10, 1), 0);
+const planeIntersection = new THREE.Vector3();
 
 function OnMouseMove(event){
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -302,11 +304,30 @@ function onClick(event){
         if (intersects.length > 0){
             const clikcedObj = intersects[0].object;
 
-            console.log(intersects[0]);
-        }
-         
-           
+            if (lawn.getTileStatus(clikcedObj) == true){
+                console.log("cant plant here");
+            } else{
+                let currPlant = plants.pop();
+
+                audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {
+                    soundEffect2.setBuffer(buffer);
+                    soundEffect2.setLoop(false);
+                    soundEffect2.setVolume(1);
+                    soundEffect2.play();
+                });
         
+                scene.add(currPlant.generatePlant());
+
+                updateSunCount(currPlant.getCost());
+
+                currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
+                lawn.occupyTile(clikcedObj);
+                raycasting = false;
+            }
+            
+
+           
+        }  
     }
 }
 
@@ -328,6 +349,7 @@ function animate() {
          
             intersects[0].object.material.emissive.setHex(0x505050);
         }
+        
     }
 
 

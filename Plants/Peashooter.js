@@ -10,9 +10,18 @@ let availablePeas = [];
 let line;
 
 class Peashooter extends Plant{
-    constructor(name, modle){
+    constructor(name, modle, health, cost){
         super(name);
+        this.health = health;
+        this.cost = cost;
         this.modle = modle;   
+    }
+
+    getCost(){
+        return this.cost;
+    }
+    getHealth(){
+        return this.health;
     }
 
     generatePlant(){
@@ -20,9 +29,12 @@ class Peashooter extends Plant{
         let boxGeo = new THREE.BoxGeometry(3, 6, 3);
         let material = new THREE.MeshStandardMaterial({ color : 0x00ff00});
         peashooter = new THREE.Mesh(boxGeo, material);
-        peashooter.position.set(0, 5, 0)
 
         return peashooter;
+    }
+
+    setPosition(x, y, z){
+        peashooter.position.set(x, y, z);
     }
 
     generateDetectionZone(){

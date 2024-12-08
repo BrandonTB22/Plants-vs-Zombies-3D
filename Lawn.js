@@ -11,6 +11,7 @@ class Lawn{
         this.lawnTile;
         this.material;
         this.tiles = [[], [], [], [], []];
+        this.occupiedTiles = [];
     }
 
     generateLawn(){
@@ -41,6 +42,25 @@ class Lawn{
 
     getLawnTileAtPosition(){
 
+    }
+
+    occupyTile(tile){
+        this.occupiedTiles.push(tile);
+    }
+
+    emptyTile(tile){
+        this.occupiedTiles.splice(this.occupiedTiles.indexOf(tile), 1);
+    }
+
+    getTileStatus(tile){
+        if (this.occupiedTiles.includes(tile)){
+            console.log("Tile occupied");
+            return true;
+        
+        } else {
+            console.log("Tile not occupied");
+            return false;
+        }
     }
 }
 
