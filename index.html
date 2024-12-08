@@ -32,7 +32,7 @@
 
     <div id="gui">
         <div id="sunEnergy">
-            <span id="sunText">0</span>
+            <span id="sunText">50</span>
         </div>
         <div id="plantSlots">
             <!-- Plant slots -->
@@ -61,7 +61,7 @@
             border: 2px solid #555;
             border-radius: 10px;
             padding: 10px;
-            width: 400px; /* Adjust as needed */
+            width: 550px; /* Adjust as needed */
             height: 60px;
         }
     
@@ -134,7 +134,6 @@ import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
-// import {BasicZombie} from './Zombies/BasicZombie.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
@@ -190,27 +189,7 @@ startButton.addEventListener('click', () => {
 
 });
 
-/*
-// Test plant
-let model;
-const modelLoader = new GLTFLoader();
-modelLoader.load('peashooter.glb',
-        (gltf) => {
-            model = gltf.scene;
-            scene.add(model);
 
-            model.position.set(0, 5, 0);
-            model.scale.set(10, 10, 10);
-            model.rotateY(1.5);
-        },
-            (xhr) => {
-                console.log('Model ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded')
-        },
-            (error) => {
-                console.log('There was an error:', error);
-        });
-
-*/
 // Add a peashooter in
 var peashooter = new Peashooter('peashooter', 100);
 var generatePeashooter = peashooter.generatePlant();
@@ -225,18 +204,6 @@ for (let i = 0; i < generatePea.length; i++){
 
 scene.add(generatePeashooter);
 
-
-// scene.add(generatePeashooterDetection);
-
-// Add the zombie
-/*
-var zombie = new BasicZombie('basicZombie', 100);
-var generateBasicZombie = zombie.generateZombie();
-var zomBox = zombie.createBoundingBox();
-scene.add(generateBasicZombie);
-*/
-
-// peashooter.detectIntersection(zomBox);
 
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
