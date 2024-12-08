@@ -128,11 +128,12 @@
     <script type="module">
 // Include all of the imports needed
 import THREE from './threejsModule.js';
+import {SoundHandler} from './SoundHandler.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
-import {BasicZombie} from './Zombies/BasicZombie.js'
+// import {BasicZombie} from './Zombies/BasicZombie.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
@@ -152,6 +153,21 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
+
+// Load the audio
+
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+const audioLoader = new THREE.AudioLoader();
+const music = new THREE.Audio(listener);
+
+audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
+    music.setBuffer(buffer);
+    music.setLoop(true);
+    music.setVolume(0);
+    music.play();
+});
 
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
@@ -192,16 +208,17 @@ var peashooter = new Peashooter('peashooter', 100);
 var generatePeashooter = peashooter.generatePlant();
 var generatePeashooterDetection = peashooter.generateDetectionZone();
 scene.add(generatePeashooter);
-scene.add(generatePeashooterDetection);
+// scene.add(generatePeashooterDetection);
 
 // Add the zombie
+/*
 var zombie = new BasicZombie('basicZombie', 100);
 var generateBasicZombie = zombie.generateZombie();
 var zomBox = zombie.createBoundingBox();
 scene.add(generateBasicZombie);
+*/
 
-console.log(zomBox);
-peashooter.detectIntersection(zomBox);
+// peashooter.detectIntersection(zomBox);
 
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
