@@ -10,7 +10,7 @@ class Lawn{
 
         this.lawnTile;
         this.material;
-        this.tiles = [];
+        this.tiles = [[], [], [], [], []];
     }
 
     generateLawn(){
@@ -33,7 +33,7 @@ class Lawn{
                 this.lawnTile = new THREE.Mesh(boxGeo, this.material);
                 this.lawnTile.position.set(this.sizeX * j, 0, this.sizeX * i);
 
-                this.tiles.push(this.lawnTile);
+                this.tiles[i].push(this.lawnTile);
             }
         }
         return this.tiles;

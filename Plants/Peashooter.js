@@ -34,15 +34,18 @@ class Peashooter extends Plant{
     }
 
     generatePeas(){
-      
+
+        let maxPeaCount = 3; // Total number of peas that one peashooter can shoot
+
         for (let i = 0; i < maxPeaCount; i++){
             let boxGeo = new THREE.BoxGeometry(1, 1, 1);
             let material = new THREE.MeshStandardMaterial({color : 0x00ff00});
             let pea = new THREE.Mesh(boxGeo, material);
+            pea.position.set(peashooter.position.x, peashooter.position.y + 2, peashooter.position.z)
             availablePeas.push(pea);
         }
 
-
+        return availablePeas;
     }
 
     createBoundingBox(){
@@ -55,12 +58,18 @@ class Peashooter extends Plant{
         }
     }
 
-    shootPeas(){
-
-
+    shootPea(){
+        let timeStep = 0.1; // How fast the peas move
+        let coolDown = 1000; // Time betweens peas shots (miliseconds)
+        let maxDistance = 200; // When the pea will be returned to the pool
+        
+        if (availablePeas.length > 0){
+       
+            availablePeas[0].visible = true;
+            availablePeas[0].position.set(availablePeas[0].position.x + timeStep, peashooter.position.y + 2, peashooter.position.z);
+            
+        }
     }
-
-
 }
 
 export {Peashooter}

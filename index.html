@@ -96,8 +96,9 @@
     
         .plantBox {
             width: 40px;
-            height: 40px;
+            height: 30px;
             background-color: #228B22; /* Green for empty slot */
+            background-size: contain;
             border: 2px solid #fff;
             border-radius: 5px;
         }
@@ -138,6 +139,15 @@ import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
+const plantImages = ['./Textures/Peashooter_Seed_Packet.jpg'];
+const boxes = document.querySelectorAll('.plantBox');
+
+boxes.forEach((box, index) => {
+  if (plantImages[index]) {
+    box.style.backgroundImage = `url(${plantImages[index]})`;
+  }
+});
+
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
 
@@ -155,7 +165,6 @@ var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 
 // Load the audio
-
 const listener = new THREE.AudioListener();
 camera.add(listener);
 
@@ -165,15 +174,14 @@ const music = new THREE.Audio(listener);
 audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     music.setBuffer(buffer);
     music.setLoop(true);
-    music.setVolume(0);
-    music.play();
+    music.setVolume(0.5);
 });
 
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
     startButton.style.display = 'none'; // Hide the button after it has been clicked
-
+    // music.play();
     camera.position.set(30, 50, 80);
     camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
     // Play start sound effect
@@ -207,7 +215,17 @@ modelLoader.load('peashooter.glb',
 var peashooter = new Peashooter('peashooter', 100);
 var generatePeashooter = peashooter.generatePlant();
 var generatePeashooterDetection = peashooter.generateDetectionZone();
+var generatePea = peashooter.generatePeas();
+console.log(generatePea.length);
+
+for (let i = 0; i < generatePea.length; i++){
+    scene.add(generatePea[i]);
+    generatePea[i].visible = false;
+}
+
 scene.add(generatePeashooter);
+
+
 // scene.add(generatePeashooterDetection);
 
 // Add the zombie
@@ -239,9 +257,12 @@ var spawn = new SpawnLocation();
 var generateSpawn = spawn.generateSpawnLocation();
 scene.add(generateSpawn);
 
-
+// Generate the lawn
 for (let i = 0; i < lawnGeneration.length; i++){
-    scene.add(lawnGeneration[i]);
+    for (let j = 0; j < lawnGeneration[i].length; j++){
+        scene.add(lawnGeneration[i][j]);
+    }
+   
 }
 
 let updateAnimation; // This will hold the animation update function
@@ -258,6 +279,7 @@ loadBasicZombie(scene).then((updateFn) => {
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
 
+    peashooter.shootPea();
     const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available
 
