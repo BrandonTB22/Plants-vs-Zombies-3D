@@ -150,6 +150,8 @@ const raycaster = new THREE.Raycaster();
 const plantImages = ['./Textures/Peashooter_Seed_Packet.jpg'];
 const boxes = document.querySelectorAll('.plantBox');
 let selectedPlant = false;
+let plantsActive = [];
+let removedPlants = [];
 let plants = [];
 
 // Set up the camera, scene, and renderer
@@ -192,6 +194,16 @@ audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
 });
 
 
+function checkForPlant(name){
+    removedPlants.forEach(plant => {
+        if (plant.getName() == name){
+            return plant;
+        } else {
+            return false;
+        }
+    })
+}
+let plantSelected = false;
 boxes.forEach((box, index) => {
   if (plantImages[index]) {
     box.style.backgroundImage = `url(${plantImages[index]})`;
@@ -203,9 +215,24 @@ boxes.forEach((box, index) => {
 
     switch (index + 1) {
         case 1:
-            console.log("Peashooter Selected");
-            let peashooter = new Peashooter('peashooter', null, 100, 100);
-            plants.push(peashooter);
+            let peashooter;
+            if (plantSelected){
+                plantSelected = false;
+                raycasting = false;
+            } else {
+                plantSelected = true;
+                console.log("Peashooter Selected");
+
+                if (removedPlants.length == 0 || checkForPlant('peashooter') == false){
+                    console.log("pass")
+                    peashooter = new Peashooter('peashooter', null, 100, 100);
+                   
+                    plants.push(peashooter);
+                } else if (removedPlants.length > 0 && checkForPlant('peashooter') != false){
+                    plants.push(checkForPlant('peashooter'));
+                    
+                } 
+            }
 
             break;
     
@@ -223,8 +250,6 @@ boxes.forEach((box, index) => {
 
   
 });
-
-
 
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
@@ -308,6 +333,7 @@ function onClick(event){
                 console.log("cant plant here");
             } else{
                 let currPlant = plants.pop();
+                plantsActive.push(currPlant);
 
                 audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {
                     soundEffect2.setBuffer(buffer);
@@ -321,12 +347,15 @@ function onClick(event){
                 updateSunCount(currPlant.getCost());
 
                 currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
+                
+                scene.add(currPlant.generatePeas()[0]);
+                scene.add(currPlant.generatePeas()[1]);
+                scene.add(currPlant.generatePeas()[2]);
+                
                 lawn.occupyTile(clikcedObj);
                 raycasting = false;
+                plantSelected = false;
             }
-            
-
-           
         }  
     }
 }
@@ -337,7 +366,12 @@ window.addEventListener('mousemove', OnMouseMove, false);
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
-
+  
+    plantsActive.forEach((plant) => {
+        if (plant.getName() == 'peashooter'){
+             plant.shootPea();  
+        }
+    });
     tiles.forEach(tile => {
         tile.material.emissive.setHex(0x000000);
     });
@@ -352,9 +386,6 @@ function animate() {
         
     }
 
-
-
-    // peashooter.shootPea();
     const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available
 
