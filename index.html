@@ -140,6 +140,7 @@ import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
+import {Snowpea} from './Plants/Snowpea.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
@@ -147,7 +148,10 @@ import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model 
 let raycasting = false;
 
 const raycaster = new THREE.Raycaster();
-const plantImages = ['./Textures/Peashooter_Seed_Packet.jpg'];
+const plantImages = [
+    './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
+    './Textures/Snowpea_Seed_Packet.jpg'    // Snowpea 
+];
 const boxes = document.querySelectorAll('.plantBox');
 let selectedPlant = false;
 let plantsActive = [];
@@ -215,41 +219,66 @@ boxes.forEach((box, index) => {
 
     switch (index + 1) {
         case 1:
+            // Peashooter selection logic
             let peashooter;
-            if (plantSelected){
+            if (plantSelected) {
                 plantSelected = false;
                 raycasting = false;
             } else {
                 plantSelected = true;
                 console.log("Peashooter Selected");
 
-                if (removedPlants.length == 0 || checkForPlant('peashooter') == false){
-                    console.log("pass")
+                // Check if Peashooter has been removed and add back if necessary
+                if (removedPlants.length == 0 || checkForPlant('peashooter') == false) {
                     peashooter = new Peashooter('peashooter', null, 100, 100);
-                   
                     plants.push(peashooter);
-                } else if (removedPlants.length > 0 && checkForPlant('peashooter') != false){
+                } else {
                     plants.push(checkForPlant('peashooter'));
-                    
-                } 
+                }
             }
-
             break;
-    
+
+            case 2:
+    // Snowpea selection logic
+    let snowpea;
+    if (plantSelected) {
+        plantSelected = false;
+        raycasting = false;
+    } else {
+        plantSelected = true;
+        console.log("Snowpea Selected");
+
+        // Check if Snowpea has been removed and add back if necessary
+        if (removedPlants.length == 0 || checkForPlant('Snowpea') == false) {
+            snowpea = new Snowpea('Snowpea', null, 175, 175); // Assuming 175 is the cost
+            plants.push(snowpea);
+
+            // Load Snowpea model
+            Snowpea(scene).then((loadedSnowpea) => {
+                console.log('Snowpea model loaded successfully');
+            }).catch((error) => {
+                console.error('Error loading Snowpea:', error);
+            });
+        } else {
+            plants.push(checkForPlant('Snowpea'));
+        }
+    }
+    break;
+
         default:
             break;
     }
 
+    // Play the seed selection sound
     audioLoader.load('./SoundFiles/seedSelect.mp3', (buffer) => {
         soundEffect1.setBuffer(buffer);
         soundEffect1.setLoop(false);
         soundEffect1.setVolume(1);
         soundEffect1.play();
     });
-  })
-
-  
+  });
 });
+
 
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
@@ -314,49 +343,47 @@ function OnMouseMove(event){
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 }
 
-function onClick(event){
+function onClick(event) {
     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-    if (raycasting){
-
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
+    if (raycasting) {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(tiles);
 
-        if (intersects.length > 0){
-            const clikcedObj = intersects[0].object;
+        if (intersects.length > 0) {
+            const clickedObj = intersects[0].object;
 
-            if (lawn.getTileStatus(clikcedObj) == true){
-                console.log("cant plant here");
-            } else{
-                let currPlant = plants.pop();
+            if (lawn.getTileStatus(clickedObj) == true) {
+                console.log("Can't plant here");
+            } else {
+                let currPlant = plants.pop();  // Get the selected plant
                 plantsActive.push(currPlant);
 
+                // Play the planting sound
                 audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {
                     soundEffect2.setBuffer(buffer);
                     soundEffect2.setLoop(false);
                     soundEffect2.setVolume(1);
                     soundEffect2.play();
                 });
-        
-                scene.add(currPlant.generatePlant());
 
+                scene.add(currPlant.generatePlant());  // Add the plant to the scene
+
+                // Update the sun count based on plant cost
                 updateSunCount(currPlant.getCost());
 
-                currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
+                // Set the plant's position on the selected tile
+                currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
+
+                // Add the peas (for Peashooter) or snow projectiles (for Snowpea)
+                scene.add(currPlant.generateProjectiles()[0]); // This will generate the projectile for the plant
                 
-                scene.add(currPlant.generatePeas()[0]);
-                scene.add(currPlant.generatePeas()[1]);
-                scene.add(currPlant.generatePeas()[2]);
-                
-                lawn.occupyTile(clikcedObj);
+                lawn.occupyTile(clickedObj);
                 raycasting = false;
                 plantSelected = false;
             }
-        }  
+        }
     }
 }
 
@@ -371,6 +398,7 @@ function animate() {
         if (plant.getName() == 'peashooter'){
              plant.shootPea();  
         }
+     
     });
     tiles.forEach(tile => {
         tile.material.emissive.setHex(0x000000);
