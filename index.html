@@ -374,7 +374,8 @@ function onClick(event) {
                 // Update the sun count based on plant cost
                 updateSunCount(currPlant.getCost());
 
-                currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
+                // Fix the variable typo
+                currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
                 
                 let peas = currPlant.generatePeas();
                 scene.add(peas[0]);
@@ -387,6 +388,7 @@ function onClick(event) {
         }
     }
 }
+
 
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
