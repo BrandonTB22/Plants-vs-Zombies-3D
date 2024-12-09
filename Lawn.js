@@ -10,7 +10,8 @@ class Lawn{
 
         this.lawnTile;
         this.material;
-        this.tiles = [];
+        this.tiles = [[], [], [], [], []];
+        this.occupiedTiles = [];
     }
 
     generateLawn(){
@@ -33,7 +34,7 @@ class Lawn{
                 this.lawnTile = new THREE.Mesh(boxGeo, this.material);
                 this.lawnTile.position.set(this.sizeX * j, 0, this.sizeX * i);
 
-                this.tiles.push(this.lawnTile);
+                this.tiles[i].push(this.lawnTile);
             }
         }
         return this.tiles;
@@ -41,6 +42,25 @@ class Lawn{
 
     getLawnTileAtPosition(){
 
+    }
+
+    occupyTile(tile){
+        this.occupiedTiles.push(tile);
+    }
+
+    emptyTile(tile){
+        this.occupiedTiles.splice(this.occupiedTiles.indexOf(tile), 1);
+    }
+
+    getTileStatus(tile){
+        if (this.occupiedTiles.includes(tile)){
+            console.log("Tile occupied");
+            return true;
+        
+        } else {
+            console.log("Tile not occupied");
+            return false;
+        }
     }
 }
 

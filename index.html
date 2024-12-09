@@ -30,6 +30,103 @@
 </head>
 <body>
 
+    <div id="gui">
+        <div id="sunEnergy">
+
+            <h3 id="sunText">1000</h3>
+        </div>
+        <div id="plantSlots">
+            <!-- Plant slots -->
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+            <div class="plantBox"></div>
+        </div>
+        <div id="shovel">
+            <img src="shovel_icon.png" alt="Shovel" />
+        </div>
+    </div>
+    <style>
+        /* GUI Container */
+        #gui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
+            border: 2px solid #555;
+            border-radius: 10px;
+            padding: 10px;
+            width: 550px; /* Adjust as needed */
+            height: 60px;
+            
+        }
+    
+        /* Sun Energy Circle */
+        #sunEnergy {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ffcc00; /* Sun yellow */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+            margin-right: 10px;
+            box-shadow: 0px 0px 10px 2px #ffcc00;
+        }
+    
+        #sunText {
+            user-select: none; /* Prevent text selection */
+        }
+    
+        /* Plant Seed Boxes */
+        #plantSlots {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr); /* 8 equally spaced columns */
+            gap: 5px;
+            margin-right: 10px;
+        }
+
+        .plantBox {
+            width: 40px;
+            height: 30px;
+            background-color: #228B22; /* Green for empty slot */
+            background-size: contain;
+            border: 2px solid #fff;
+            border-radius: 5px;
+        }
+
+        .plantBox:hover{
+            filter: grayscale(100%);
+        }
+    
+        /* Shovel Icon */
+        #shovel {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #888; /* Neutral color for shovel */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+    
+        #shovel img {
+            width: 40px;
+            height: 40px;
+        }
+    </style>
+
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
     <button id="startButton">Begin Game</button>
     
@@ -38,6 +135,7 @@
     <script type="module">
 // Include all of the imports needed
 import THREE from './threejsModule.js';
+import {SoundHandler} from './SoundHandler.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
@@ -45,6 +143,16 @@ import {Peashooter} from './Plants/Peashooter.js';
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
+
+let raycasting = false;
+
+const raycaster = new THREE.Raycaster();
+const plantImages = ['./Textures/Peashooter_Seed_Packet.jpg'];
+const boxes = document.querySelectorAll('.plantBox');
+let selectedPlant = false;
+let plantsActive = [];
+let removedPlants = [];
+let plants = [];
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -62,47 +170,95 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 
+// Update the sun count when planted
+function updateSunCount(amount){
+    const text = document.getElementById('sunText');
+
+    text.textContent = text.textContent - amount;
+}
+
+
+// Load the audio
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+const audioLoader = new THREE.AudioLoader();
+const levelMusic = new THREE.Audio(listener);
+const soundEffect1 = new THREE.Audio(listener);
+const soundEffect2 = new THREE.Audio(listener);
+
+audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
+    levelMusic.setBuffer(buffer);
+    levelMusic.setLoop(true);
+    levelMusic.setVolume(0.5);
+});
+
+
+function checkForPlant(name){
+    removedPlants.forEach(plant => {
+        if (plant.getName() == name){
+            return plant;
+        } else {
+            return false;
+        }
+    })
+}
+let plantSelected = false;
+boxes.forEach((box, index) => {
+  if (plantImages[index]) {
+    box.style.backgroundImage = `url(${plantImages[index]})`;
+  }
+
+  box.addEventListener('click', () => {
+    console.log(`Box ${index + 1} clicked!`);
+    raycasting = true;
+
+    switch (index + 1) {
+        case 1:
+            let peashooter;
+            if (plantSelected){
+                plantSelected = false;
+                raycasting = false;
+            } else {
+                plantSelected = true;
+                console.log("Peashooter Selected");
+
+                if (removedPlants.length == 0 || checkForPlant('peashooter') == false){
+                    console.log("pass")
+                    peashooter = new Peashooter('peashooter', null, 100, 100);
+                   
+                    plants.push(peashooter);
+                } else if (removedPlants.length > 0 && checkForPlant('peashooter') != false){
+                    plants.push(checkForPlant('peashooter'));
+                    
+                } 
+            }
+
+            break;
+    
+        default:
+            break;
+    }
+
+    audioLoader.load('./SoundFiles/seedSelect.mp3', (buffer) => {
+        soundEffect1.setBuffer(buffer);
+        soundEffect1.setLoop(false);
+        soundEffect1.setVolume(1);
+        soundEffect1.play();
+    });
+  })
+
+  
+});
+
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
     startButton.style.display = 'none'; // Hide the button after it has been clicked
-
+    levelMusic.play();
     camera.position.set(30, 50, 80);
     camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
-    // Play start sound effect
-
-    //l
-
 });
-
-/*
-// Test plant
-let model;
-const modelLoader = new GLTFLoader();
-modelLoader.load('peashooter.glb',
-        (gltf) => {
-            model = gltf.scene;
-            scene.add(model);
-
-            model.position.set(0, 5, 0);
-            model.scale.set(10, 10, 10);
-            model.rotateY(1.5);
-        },
-            (xhr) => {
-                console.log('Model ${(xhr.loaded / xhr.total * 100).toFixed(2)}% loaded')
-        },
-            (error) => {
-                console.log('There was an error:', error);
-        });
-
-*/
-
-var peashooter = new Peashooter('peashooter', 100);
-var generatePeashooter = peashooter.generatePlant();
-var generatePeashooterDetection = peashooter.generateDetectionZone();
-scene.add(generatePeashooter);
-scene.add(generatePeashooterDetection);
-
 
 // Texture Loader
 var texLoader = new THREE.TextureLoader();
@@ -110,6 +266,7 @@ var grass1 = texLoader.load('Textures/grass1.jpg');
 var grass2 = texLoader.load('Textures/grass2.jpg');
 
 // Add the lawn to the scene
+var tiles = [];
 var lawn = new Lawn(grass1, grass2, 8, 8, 8);
 var lawnGeneration = lawn.generateLawn();
 
@@ -123,10 +280,19 @@ var spawn = new SpawnLocation();
 var generateSpawn = spawn.generateSpawnLocation();
 scene.add(generateSpawn);
 
-
+// Generate the lawn
 for (let i = 0; i < lawnGeneration.length; i++){
-    scene.add(lawnGeneration[i]);
+    for (let j = 0; j < lawnGeneration[i].length; j++){
+        scene.add(lawnGeneration[i][j]);
+        tiles.push(lawnGeneration[i][j]);
+    }
 }
+
+tiles.forEach(tile => {
+    tile.addEventListener('click', () => {
+        console.log("tile clicked");
+    });
+});
 
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
@@ -138,9 +304,87 @@ loadBasicZombie(scene).then((updateFn) => {
     console.error("Error loading the zombie:", error);
 });
 
+// Mouse movements 
+const mouse = new THREE.Vector2();
+const plane = new THREE.Plane(new THREE.Vector3(0, 10, 1), 0);
+const planeIntersection = new THREE.Vector3();
+
+function OnMouseMove(event){
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+}
+
+function onClick(event){
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    if (raycasting){
+
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(tiles);
+
+        if (intersects.length > 0){
+            const clikcedObj = intersects[0].object;
+
+            if (lawn.getTileStatus(clikcedObj) == true){
+                console.log("cant plant here");
+            } else{
+                let currPlant = plants.pop();
+                plantsActive.push(currPlant);
+
+                audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {
+                    soundEffect2.setBuffer(buffer);
+                    soundEffect2.setLoop(false);
+                    soundEffect2.setVolume(1);
+                    soundEffect2.play();
+                });
+        
+                scene.add(currPlant.generatePlant());
+
+                updateSunCount(currPlant.getCost());
+
+                currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
+                
+                scene.add(currPlant.generatePeas()[0]);
+                scene.add(currPlant.generatePeas()[1]);
+                scene.add(currPlant.generatePeas()[2]);
+                
+                lawn.occupyTile(clikcedObj);
+                raycasting = false;
+                plantSelected = false;
+            }
+        }  
+    }
+}
+
+window.addEventListener('click', onClick, false);
+window.addEventListener('mousemove', OnMouseMove, false);
+
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
+  
+    plantsActive.forEach((plant) => {
+        if (plant.getName() == 'peashooter'){
+             plant.shootPea();  
+        }
+    });
+    tiles.forEach(tile => {
+        tile.material.emissive.setHex(0x000000);
+    });
+    if (raycasting){
+
+        raycaster.setFromCamera(mouse, camera);
+        const intersects = raycaster.intersectObjects(tiles);
+        for (let i = 0; i < intersects.length; i++){
+         
+            intersects[0].object.material.emissive.setHex(0x505050);
+        }
+        
+    }
 
     const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available

@@ -9,15 +9,15 @@ export function loadBasicZombie(scene) {
             '/Zombies/zombie/scene.gltf', // Path to the model
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
-                zombie.position.set(25, 20, 27); // Position in the center of the scene
-                zombie.scale.set(35, 35, 35); // Adjust scale if needed
+                zombie.position.set(55, 20, 30); // Position in the center of the scene
+                zombie.scale.set(20, 20, 20); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
                 direction.y = 0; // Keep the zombie facing horizontally, prevent flipping
                 direction.normalize(); // Normalize the direction vector
                 
                 // Update the zombie's rotation to face the camera
-                const rotation = new Quaternion().setFromUnitVectors(new Vector3(-2, 0, 9), direction);
+                const rotation = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 2), direction);
                 zombie.quaternion.copy(rotation); // Apply the rotation to the zombie
                 scene.add(zombie);
 
