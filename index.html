@@ -135,6 +135,7 @@
     <script type="module">
 // Include all of the imports needed
 import THREE from './threejsModule.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SoundHandler} from './SoundHandler.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
@@ -142,7 +143,6 @@ import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
 import {Snowpea} from './Plants/Snowpea.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
 let raycasting = false;
