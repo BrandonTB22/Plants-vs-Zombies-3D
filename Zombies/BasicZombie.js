@@ -30,7 +30,10 @@ export function loadBasicZombie(scene) {
                 // Ensure the required nodes are found
                 const lThigh = nodes['l_thigh_025'];
                 const rThigh = nodes['r_thigh_029'];
-                if (!lThigh || !rThigh) {
+                const head = nodes['head_013']; // Head node for nodding
+                const lShoulder = nodes['l_shoulder_05']; // Left shoulder for swinging
+                const rShoulder = nodes['r_shoulder_016']; // Right Shoulder
+                if (!lThigh || !rThigh || !head || !lShoulder || !rShoulder) {
                     console.error('Required nodes not found in the model!');
                     reject('Nodes not found');
                     return;
@@ -38,7 +41,7 @@ export function loadBasicZombie(scene) {
 
                 // Set up animation
                 const mixer = new AnimationMixer(zombie);
-                const walkingClip = createWalkingAnimation(lThigh, rThigh);
+                const walkingClip = createWalkingAnimation(lThigh, rThigh, head, lShoulder, rShoulder);
                 const action = mixer.clipAction(walkingClip);
                 action.play();
 
@@ -56,15 +59,14 @@ export function loadBasicZombie(scene) {
         );
     });
 
-    function createWalkingAnimation(lThigh, rThigh) {
+    function createWalkingAnimation(lThigh, rThigh, head, lShoulder, rShoulder) {
         const times = [0, 1, 3]; // Time points for the walking cycle
-        const hipRotation = new Quaternion(-0.5000000596046448, -0.49999991059303284, -0.5, 0.5); // Existing hip rotation
 
-        // Apply an additional 90-degree rotation to the hip (around X-axis)
+        // Hip rotations
+        const hipRotation = new Quaternion(-0.5000000596046448, -0.49999991059303284, -0.5, 0.5); // Existing hip rotation
         const hipRotationDownward = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
-        hipRotation.multiply(hipRotationDownward); // Combine rotations
-        
-        // Update the thigh rotations
+        hipRotation.multiply(hipRotationDownward);
+
         const lThighRotations = [
             hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 5), -Math.PI / 4)), // Rotate left leg downward
             hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -Math.PI / 4)), // Rotate back to neutral position
@@ -76,7 +78,52 @@ export function loadBasicZombie(scene) {
             hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 4)), // Rotate back to neutral position
             hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -5), -Math.PI / 4)), // Reset to downward
         ];
-        
+
+        const headRotations = [
+            new Quaternion().setFromAxisAngle(new Vector3(0, 0, 2), Math.PI / 8), // Head nods downward
+            new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 8), // Head nods downward
+            new Quaternion().setFromAxisAngle(new Vector3(0, 0, -2), -Math.PI / 8), // Head nods upward
+        ];
+        const shoulderRotationsl = [
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-2, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -0.5), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 18)), // Slight upward swing
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-2, 2, 0), Math.PI / 2) // Neutral forward position
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -0.5), Math.PI / 6)), // Lower arm by rotating downward on Y-axis
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-2, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -0.5), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -1), -Math.PI / 18)), // Slight downward swing
+        ];
+         
+
+        const shoulderRotationsr = [
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-3, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-6, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 10), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 18)), // Slight upward swing
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-3, 2, 0), Math.PI / 2) // Neutral forward position
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-6, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 20), Math.PI / 6)), // Lower arm by rotating downward on Y-axis
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-3, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-6, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 10), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -1), -Math.PI / 18)), // Slight downward swing
+        ];
         
 
         const lThighTrack = new QuaternionKeyframeTrack(
@@ -91,6 +138,27 @@ export function loadBasicZombie(scene) {
             rThighRotations.flatMap(q => [q.x, q.y, q.z, q.w])
         );
 
-        return new AnimationClip('Walking', -1, [lThighTrack, rThighTrack]);
+        const headTrack = new QuaternionKeyframeTrack(
+            `${head.uuid}.quaternion`,
+            times,
+            headRotations.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+        const shoulderTrackl = new QuaternionKeyframeTrack(
+            `${lShoulder.uuid}.quaternion`,
+            times,
+            shoulderRotationsl.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+        const shoulderTrackr = new QuaternionKeyframeTrack(
+            `${rShoulder.uuid}.quaternion`,
+            times,
+            shoulderRotationsr.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+
+        return new AnimationClip('Walking', -1, [lThighTrack, rThighTrack, headTrack, shoulderTrackl, shoulderTrackr]);
     }
 }
+
+
