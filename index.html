@@ -348,9 +348,9 @@ function onClick(event){
 
                 currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
                 
-                scene.add(currPlant.generatePeas()[0]);
-                scene.add(currPlant.generatePeas()[1]);
-                scene.add(currPlant.generatePeas()[2]);
+                let peas = currPlant.generatePeas();
+                scene.add(peas[0]);
+                scene.add(peas[1]);
                 
                 lawn.occupyTile(clikcedObj);
                 raycasting = false;
@@ -367,11 +367,14 @@ window.addEventListener('mousemove', OnMouseMove, false);
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
   
+    // Handle peashooter shooting peas
     plantsActive.forEach((plant) => {
         if (plant.getName() == 'peashooter'){
              plant.shootPea();  
         }
     });
+
+    // Set tile to normal color unless raycasting
     tiles.forEach(tile => {
         tile.material.emissive.setHex(0x000000);
     });

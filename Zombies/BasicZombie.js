@@ -9,7 +9,7 @@ export function loadBasicZombie(scene) {
             '/Zombies/zombie/scene.gltf', // Path to the model
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
-                zombie.position.set(55, 20, 30); // Position in the center of the scene
+                zombie.position.set(55, 20, 50); // Position in the center of the scene
                 zombie.scale.set(20, 20, 20); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
