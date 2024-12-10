@@ -145,7 +145,7 @@ import {Snowpea} from './Plants/Snowpea.js'
 import {Repeater} from './Plants/Repeater.js'
 import {Chomper} from './Plants/Chomper.js'
 import {Potatomine} from './Plants/Potatomine.js'
-import Sunflower from './Plants/Sunflower.js'; 
+import {Sunflower} from './Plants/Sunflower.js'; 
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
@@ -187,8 +187,6 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
-
-const sunflower = new Sunflower('Sunflower', null, 100, 50);
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -237,7 +235,7 @@ boxes.forEach((box, index) => {
 
                 // Check if Peashooter has been removed and add back if necessary
                 if (removedPlants.length == 0 || checkForPlant('peashooter') == false) {
-                    peashooter = new Peashooter('peashooter', null, 100, 100);
+                    peashooter = new Peashooter('peashooter', 100, 100, 'Plants/peashooter/scene.gltf', 0, 3, -2,   0, 1.5, 0,  3, 3, 3);
                     plants.push(peashooter);
                 } else {
                     plants.push(checkForPlant('peashooter'));
@@ -273,11 +271,31 @@ boxes.forEach((box, index) => {
     break;
 
         case 3:
+        // Sunflower selection logic\
+        let sunflower;
 
-        break;
+        if (plantSelected){
+            plantSelected = false;
+            raycasting = false;
+        } else {
+            plantSelected = true;
+            console.log("Sunflower Selected");
+
+            // Check if a sunflower has been removed and add it back
+
+            if (removedPlants.length == 0 || checkForPlant('sunflower') == false) {
+                sunflower = new Sunflower ('sunflower', 50, 100, 'Plants/sunflower/scene.gltf', 0, -3.3, -3,    0, 0, 0,     0.4, 0.4, 0.4);
+                plants.push(sunflower);
+            } else {
+                plants.push(checkForPlant('sunflower'));
+            }
+        }
+
+            break;
 
         case 4:
 
+        // Repeater selection logic
         let repeater;
 
         if (plantSelected){
@@ -289,7 +307,7 @@ boxes.forEach((box, index) => {
 
             // Check if repeater has been removed and add back if necessary
             if (removedPlants.length == 0 || checkForPlant('repeater') == false) {
-                repeater = new Repeater('repeater', 100, 100);
+                repeater = new Repeater('repeater', 100, 100, 'Plants/repeater/scene.gltf', 0, 0, 0,   0 ,3 ,0,    3, 3, 3);
                 plants.push(repeater);
             } else {
                 plants.push(checkForPlant('repeater'));
@@ -406,6 +424,13 @@ function onClick(event) {
                     try {
                         const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
                         scene.add(model);
+
+                        if (currPlant.getName() == 'peashooter'){
+                            let peas = currPlant.generatePeas();
+                            scene.add(peas[0]);
+                     
+                        };
+                
                     } catch (error) {
                         console.error("Failed to add model to the scene", error);
                     }
@@ -415,13 +440,8 @@ function onClick(event) {
                 // Update the sun count based on plant cost
                 // updateSunCount(currPlant.getCost());
 
-                /*
-                if (currPlant.getName() == 'peashooter'){
-                    let peas = currPlant.generatePeas();
-                    scene.add(peas[0]);
-                    scene.add(peas[1]);
-                };
-                */
+                
+          
                 
                 lawn.occupyTile(clickedObj);
                 raycasting = false;
@@ -439,7 +459,7 @@ window.addEventListener('mousemove', OnMouseMove, false);
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
   
-    // Handle peashooter shooting peas
+    // Handle peashooter shooting peas (will be moved)
     plantsActive.forEach((plant) => {
         if (plant.getName() == 'peashooter'){
              plant.shootPea();  

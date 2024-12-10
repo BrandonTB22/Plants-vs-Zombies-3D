@@ -3,37 +3,16 @@ import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quater
 import {Plant} from './Plant.js';
 import THREE from '../threejsModule.js';
 
+
+
+let modelPath = 'Plants/repeater/scene.gltf';
+
 class Repeater extends Plant{
-    constructor(name, cost, health){
-        super(name, cost, health);
-    }
-    
-    async generatePlant(x, y, z) {
-        const loader = new GLTFLoader();
-        const gltf = await new Promise((resolve, reject) => {
-            loader.load(
-                'Plants/repeater/scene.gltf',
-                resolve,
-                undefined,
-                reject
-            );
-        });
-    
-        const model = gltf.scene;
-    
-        if (model instanceof THREE.Object3D) {
-            model.scale.set(3, 3, 3);
-            model.rotation.set(0, 3, 0);
-            model.position.set(x, y, z);
-       
-            return model;
-          
-        } else {
-            throw new Error('Loaded model is not an instance of THREE.Object3D');
-        }
+    constructor(name, health, cost, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ){
+        super(name, cost, health, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
+
     }
 }
-
 export {Repeater}
 
 
