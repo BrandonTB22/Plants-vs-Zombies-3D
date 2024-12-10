@@ -98,7 +98,7 @@
 
         .plantBox {
             width: 40px;
-            height: 30px;
+            height: 28px;
             background-color: #228B22; /* Green for empty slot */
             background-size: contain;
             border: 2px solid #fff;
@@ -154,7 +154,8 @@ const raycaster = new THREE.Raycaster();
 const plantImages = [
     './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
     './Textures/Snowpea_Seed_Packet.jpg',    // Snowpea 
-    './Textures/sunflowerSeedPacket.jpg' // Sunflower 
+    './Textures/sunflowerSeedPacket.jpg',
+    './Textures/Repeater_Seed_Packet.jpg' // Sunflower 
 ];
 const boxes = document.querySelectorAll('.plantBox');
 let selectedPlant = false;
@@ -184,14 +185,6 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
-Repeater(scene).then((model) => {
-    console.log("Repeater model has been loaded and added to the scene");
-
-    // You can manipulate the model after loading, for example, set its position
-    model.position.set(0, 1.2, 0); // Set the initial position
-}).catch((error) => {
-    console.error("Error loading the repeater:", error);
-});
 
 const sunflower = new Sunflower('Sunflower', null, 100, 50);
 
@@ -210,6 +203,8 @@ audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     levelMusic.setVolume(0.5);
 });
 
+let rep = new Repeater('repeater', 200, 100);
+rep.generatePlant(scene);
 
 function checkForPlant(name){
     removedPlants.forEach(plant => {
@@ -280,6 +275,27 @@ boxes.forEach((box, index) => {
 
         case 3:
 
+        break;
+
+        case 4:
+
+        let repeater;
+
+        if (plantSelected){
+            plantSelected = false;
+            raycasting = false;
+        } else {
+            plantSelected = true;
+            console.log("Repeater Selected");
+
+            // Check if repeater has been removed and add back if necessary
+            if (removedPlants.length == 0 || checkForPlant('repeater') == false) {
+                repeater = new Repeater('repeater', 100, 100);
+                plants.push(repeater);
+            } else {
+                plants.push(checkForPlant('repeater'));
+            }
+        }
 
         default:
             break;
@@ -385,11 +401,12 @@ function onClick(event) {
                     soundEffect2.play();
                 });
 
+                console.log(currPlant.generatePlant());
                 scene.add(currPlant.generatePlant());  // Add the plant to the scene
-                scene.add(currPlant.generateDetectionZone());
+               
 
                 // Update the sun count based on plant cost
-                updateSunCount(currPlant.getCost());
+                // updateSunCount(currPlant.getCost());
 
                 // Fix the variable typo
                 currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
