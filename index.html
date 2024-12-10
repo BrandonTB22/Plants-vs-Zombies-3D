@@ -150,7 +150,8 @@ let raycasting = false;
 const raycaster = new THREE.Raycaster();
 const plantImages = [
     './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
-    './Textures/Snowpea_Seed_Packet.jpg'    // Snowpea 
+    './Textures/Snowpea_Seed_Packet.jpg',    // Snowpea 
+    './Textures/Sun_Flower_Seed_Peacket.jpg' // Sunflower 
 ];
 const boxes = document.querySelectorAll('.plantBox');
 let selectedPlant = false;
@@ -180,7 +181,6 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
-
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -264,6 +264,9 @@ boxes.forEach((box, index) => {
         }
     }
     break;
+
+        case 3:
+
 
         default:
             break;
@@ -373,7 +376,7 @@ function onClick(event) {
                 // Update the sun count based on plant cost
                 updateSunCount(currPlant.getCost());
 
-                currPlant.setPosition(clikcedObj.position.x, clikcedObj.position.y + 5, clikcedObj.position.z);
+                currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
                 
                 let peas = currPlant.generatePeas();
                 scene.add(peas[0]);
