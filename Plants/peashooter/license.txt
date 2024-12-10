@@ -1,0 +1,11 @@
+Model Information:
+* title:	Peashooter - Plants vs Zombies
+* source:	https://sketchfab.com/3d-models/peashooter-plants-vs-zombies-6a2b7d3a25f74eafb4825dc20221a74e
+* author:	stosovskay (https://sketchfab.com/stosovskay)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Peashooter - Plants vs Zombies" (https://sketchfab.com/3d-models/peashooter-plants-vs-zombies-6a2b7d3a25f74eafb4825dc20221a74e) by stosovskay (https://sketchfab.com/stosovskay) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

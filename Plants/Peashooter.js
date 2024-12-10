@@ -5,12 +5,13 @@ import {Plant} from './Plant.js';
 
 let line;
 
-
 // Name: peashooter; Health; cost: 100 sun
-class Peashooter extends Plant {
-    constructor(name, model, health, cost, Xblock, Yblock, lawn) {
-        super(name, cost, health, Xblock, Yblock, lawn); // Pass all parameters to the Plant constructor
-        this.model = model;  // Additional properties for Peashooter
+class Peashooter extends Plant{
+    constructor(name, modle, health, cost){
+        super(name);
+        this.health = health;
+        this.cost = cost;
+        this.modle = modle;   
         this.peashooter;
         this.pea;
         this.count = 0;
@@ -38,6 +39,8 @@ class Peashooter extends Plant {
         return this.peashooter;
     }
 
+    
+
     generatePeas(){
         let maxPeaCount = 2; // Total number of peas that one peashooter can shoot
 
@@ -57,15 +60,18 @@ class Peashooter extends Plant {
     }
 
     generateDetectionZone(){
-        const material = new THREE.LineBasicMaterial({color : 0xffffff});
-
-        const points = [new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z), 
-            new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z)];
-        
-        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-        const line = new THREE.Line(geometry, material);
+        const start = new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z);
+        const end = new THREE.Vector3(this.lawnSizeX, this.peashooter.position.y + 2, this.peashooter.position.z);
+        line = new THREE.Line3(start, end);
 
         return line;
+    }
+
+
+    detectIntersection(box){
+        if (box.intersectsLine(line)){
+            console.log("collision");
+        }
     }
 
     sleep(ms){
