@@ -143,6 +143,7 @@ import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
 import {Snowpea} from './Plants/Snowpea.js'
 import {Repeater} from './Plants/Repeater.js'
+import Sunflower from './Plants/Sunflower.js'; 
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
@@ -191,6 +192,8 @@ Repeater(scene).then((model) => {
 }).catch((error) => {
     console.error("Error loading the repeater:", error);
 });
+
+const sunflower = new Sunflower('Sunflower', null, 100, 50);
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -415,6 +418,7 @@ function animate() {
         if (plant.getName() == 'peashooter'){
              plant.shootPea();  
         }
+        
      
     });
 

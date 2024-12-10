@@ -8,12 +8,7 @@ export function Repeater(scene) {
             const model = gltf.scene;
             model.scale.set(3, 3, 3); // Scale the model to fit in the scene
             scene.add(model); // Add the model to the scene
-          
-
-            // Optionally, you can add animations to the model if it has any
-            // const mixer = new THREE.AnimationMixer(model);
-            // gltf.animations.forEach((clip) => mixer.clipAction(clip).play());
-
+        
             resolve(model); // Resolve the promise with the model
         }, undefined, function (error) {
             console.error('Error loading Repeater model', error);
