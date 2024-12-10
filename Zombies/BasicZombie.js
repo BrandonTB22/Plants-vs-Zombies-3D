@@ -1,7 +1,29 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
 
-export function loadBasicZombie(scene) {
+class BasicZombie {
+    constructor(type, health, laneNum){
+        this.type = type;
+        this.health = health;
+        this.laneNum = laneNum;
+        this.model;
+    }
+
+getType(){
+    return this.type;
+}
+
+updateZombiePosition(){
+    if (this.model != null){
+        this.model.position.x -= 0.01;
+    }
+}
+
+setToSpawnPosition(x, y, z){
+    this.model.position.set(x, y, z);
+}
+
+loadBasicZombie(scene) {
     return new Promise((resolve, reject) => {
         const loader = new GLTFLoader();
         
@@ -9,8 +31,8 @@ export function loadBasicZombie(scene) {
             '/Zombies/zombie/scene.gltf', // Path to the model
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
-                zombie.position.set(55, 20, 50); // Position in the center of the scene
-                zombie.scale.set(20, 20, 20); // Adjust scale if needed
+                zombie.position.set(45, 5, 30); // Position in the center of the scene
+                zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
                 direction.y = 0; // Keep the zombie facing horizontally, prevent flipping
@@ -19,6 +41,7 @@ export function loadBasicZombie(scene) {
                 // Update the zombie's rotation to face the camera
                 const rotation = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 2), direction);
                 zombie.quaternion.copy(rotation); // Apply the rotation to the zombie
+                this.model = zombie;
                 scene.add(zombie);
 
                 // Extract nodes by their names
@@ -61,6 +84,7 @@ export function loadBasicZombie(scene) {
 
     function createWalkingAnimation(lThigh, rThigh, head, lShoulder, rShoulder) {
         const times = [0, 1, 3]; // Time points for the walking cycle
+        
 
         // Hip rotations
         const hipRotation = new Quaternion(-0.5000000596046448, -0.49999991059303284, -0.5, 0.5); // Existing hip rotation
@@ -160,5 +184,8 @@ export function loadBasicZombie(scene) {
         return new AnimationClip('Walking', -1, [lThighTrack, rThighTrack, headTrack, shoulderTrackl, shoulderTrackr]);
     }
 }
+}
+
+export {BasicZombie}
 
 

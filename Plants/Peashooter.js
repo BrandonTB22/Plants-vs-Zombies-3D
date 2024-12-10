@@ -38,11 +38,8 @@ class Peashooter extends Plant {
     }
 
 
-
     generateDetectionZone(){
-        const start = new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z);
-        const end = new THREE.Vector3(this.lawnSizeX, this.peashooter.position.y + 2, this.peashooter.position.z);
-        line = new THREE.Line3(start, end);
+        const geo = new THREE.BoxGeometry();
 
         return line;
     }
@@ -64,9 +61,9 @@ class Peashooter extends Plant {
         let coolDown = 1000; // Time betweens peas shots (miliseconds)
         let maxDistance = 70; // When the pea will be returned to the pool
         let pea1 = this.availablePeas[0];
-        let startPos = this.peashooter.position.x;
-      
+        let startPos = this.model.position.x;
         
+      
         if (pea1.position.x <= maxDistance){
             pea1.visible = true;
             pea1.position.x += timeStep;

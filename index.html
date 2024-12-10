@@ -147,7 +147,8 @@ import {Chomper} from './Plants/Chomper.js'
 import {Potatomine} from './Plants/Potatomine.js'
 import {Sunflower} from './Plants/Sunflower.js'; 
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
-import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
+import {GameLogic} from './GameLogic.js';
+import {BasicZombie} from './Zombies/BasicZombie.js';
 
 
 let raycasting = false;
@@ -187,6 +188,7 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
+var game = new GameLogic(scene);
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -196,6 +198,13 @@ const audioLoader = new THREE.AudioLoader();
 const levelMusic = new THREE.Audio(listener);
 const soundEffect1 = new THREE.Audio(listener);
 const soundEffect2 = new THREE.Audio(listener);
+const soundEffect3 = new THREE.Audio(listener);
+
+audioLoader.load('./SoundFiles/zombiesAreComing.mp3', (buffer) => {
+    soundEffect3.setBuffer(buffer);
+    soundEffect3.setLoop(false);
+    soundEffect3.setVolume(1.0);
+})
 
 audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     levelMusic.setBuffer(buffer);
@@ -328,14 +337,29 @@ boxes.forEach((box, index) => {
   });
 });
 
+// Load the zombie model and get the animation update function
+var basicZombie = new BasicZombie('basic', 1000);
+const zombieUpdateFns = [];
+
+basicZombie.loadBasicZombie(scene).then((updateFn) => {
+    zombieUpdateFns.push(updateFn); // Assign the update function when the promise resolves
+}).catch((error) => {
+    console.error("Error loading the zombie:", error);
+});
+
 
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
     startButton.style.display = 'none'; // Hide the button after it has been clicked
+    game.startGame();
     levelMusic.play();
     camera.position.set(30, 50, 80);
     camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
+
+    setTimeout(() => {
+        soundEffect3.play();
+    },10000)
 });
 
 // Texture Loader
@@ -374,14 +398,6 @@ tiles.forEach(tile => {
 
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
-
-// Load the zombie model and get the animation update function
-loadBasicZombie(scene).then((updateFn) => {
-    updateAnimation = updateFn; // Assign the update function when the promise resolves
-}).catch((error) => {
-    console.error("Error loading the zombie:", error);
-});
-
 
 // Mouse movements 
 const mouse = new THREE.Vector2();
@@ -451,6 +467,8 @@ function onClick(event) {
     }
 }
 
+// Zombies to animate
+let zombies = game.transferZombies();
 
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
@@ -458,16 +476,17 @@ window.addEventListener('mousemove', OnMouseMove, false);
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
-  
-    // Handle peashooter shooting peas (will be moved)
-    plantsActive.forEach((plant) => {
-        if (plant.getName() == 'peashooter'){
-             plant.shootPea();  
-        }
-        
-     
-    });
+    basicZombie.updateZombiePosition();
+    
+    for (let i = 0; i < zombies.length; i++){
 
+        zombies[i].loadBasicZombie(scene).then((updateFn) => {
+            zombieUpdateFns.push(updateFn);// Assign the update function when the promise resolves
+        }).catch((error) => {
+            console.error("Error loading the zombie:", error);
+        });
+        zombies.splice(zombies[i], 1);
+    }
     // Set tile to normal color unless raycasting
     tiles.forEach(tile => {
         tile.material.emissive.setHex(0x000000);
@@ -485,6 +504,10 @@ function animate() {
 
     const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available
+
+    zombieUpdateFns.forEach((updateFn) =>{
+        updateFn(delta);
+    })
 
     renderer.render(scene, camera); // Render the scene
 }

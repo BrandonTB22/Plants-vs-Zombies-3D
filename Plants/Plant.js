@@ -7,6 +7,7 @@ class Plant {
         this.cost = cost;  // Store the cost
         this.health = health;  // Initialize health properly
         this.modelPath = modelPath;
+        this.model;
 
         // Used to adjust the position on the tile
         this.Xadj = Xadj;
@@ -36,6 +37,7 @@ class Plant {
         });
     
         const model = gltf.scene;
+        this.model = model;
        
     
         if (model instanceof THREE.Object3D) {
