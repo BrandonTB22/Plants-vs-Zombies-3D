@@ -142,6 +142,7 @@ import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
 import {Snowpea} from './Plants/Snowpea.js'
+import {Repeater} from './Plants/Repeater.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
 
@@ -182,6 +183,14 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
+Repeater(scene).then((model) => {
+    console.log("Repeater model has been loaded and added to the scene");
+
+    // You can manipulate the model after loading, for example, set its position
+    model.position.set(0, 1.2, 0); // Set the initial position
+}).catch((error) => {
+    console.error("Error loading the repeater:", error);
+});
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -336,6 +345,7 @@ loadBasicZombie(scene).then((updateFn) => {
 }).catch((error) => {
     console.error("Error loading the zombie:", error);
 });
+
 
 // Mouse movements 
 const mouse = new THREE.Vector2();
