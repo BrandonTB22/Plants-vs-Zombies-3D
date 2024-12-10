@@ -135,6 +135,7 @@
     <script type="module">
 // Include all of the imports needed
 import THREE from './threejsModule.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SoundHandler} from './SoundHandler.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
@@ -142,8 +143,8 @@ import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
 import {Snowpea} from './Plants/Snowpea.js'
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'; // Used for models
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
+
 
 let raycasting = false;
 
@@ -376,6 +377,7 @@ function onClick(event) {
                 // Update the sun count based on plant cost
                 updateSunCount(currPlant.getCost());
 
+                // Fix the variable typo
                 currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
                 
                 let peas = currPlant.generatePeas();
@@ -389,6 +391,7 @@ function onClick(event) {
         }
     }
 }
+
 
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
