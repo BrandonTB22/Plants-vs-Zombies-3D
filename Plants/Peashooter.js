@@ -3,10 +3,7 @@ import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import {Plant} from './Plant.js';
 
-let line;
-
-
-// Name: peashooter; Health; cost: 100 sun
+// Name: peashooter; Cost: 100 sun
 class Peashooter extends Plant {
     constructor(name, model, health, cost, Xblock, Yblock, lawn) {
         super(name, cost, health, Xblock, Yblock, lawn); // Pass all parameters to the Plant constructor
@@ -23,10 +20,6 @@ class Peashooter extends Plant {
     }
     getHealth(){
         return this.health;
-    }
-
-    getName(){
-        return this.name;
     }
 
     generatePlant(){

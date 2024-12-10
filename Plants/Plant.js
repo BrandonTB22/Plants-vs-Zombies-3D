@@ -9,7 +9,6 @@ class Plant {
         this.lawn = lawn;  // Any reference to the lawn if needed
     }
 
-
     setPosition(x, y, z) {
         this.position.set(x, y, z);  // Set position using THREE.Vector3's set method
     }
@@ -30,6 +29,9 @@ class Plant {
         // Placeholder for removing the plant
     }
 
+    getName(){
+        return this.name;
+    }
     detectIntersection() {
         // Placeholder for detecting intersection logic
     }
