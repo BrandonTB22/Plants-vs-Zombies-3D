@@ -152,7 +152,8 @@ let raycasting = false;
 const raycaster = new THREE.Raycaster();
 const plantImages = [
     './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
-    './Textures/Snowpea_Seed_Packet.jpg'    // Snowpea 
+    './Textures/Snowpea_Seed_Packet.jpg',    // Snowpea 
+    './Textures/Sun_Flower_Seed_Peacket.jpg' // Sunflower 
 ];
 const boxes = document.querySelectorAll('.plantBox');
 let selectedPlant = false;
@@ -182,7 +183,6 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
-
 Repeater(scene).then((model) => {
     console.log("Repeater model has been loaded and added to the scene");
 
@@ -274,6 +274,9 @@ boxes.forEach((box, index) => {
         }
     }
     break;
+
+        case 3:
+
 
         default:
             break;
