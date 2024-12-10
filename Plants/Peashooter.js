@@ -57,18 +57,15 @@ class Peashooter extends Plant {
     }
 
     generateDetectionZone(){
-        const start = new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z);
-        const end = new THREE.Vector3(this.lawnSizeX, this.peashooter.position.y + 2, this.peashooter.position.z);
-        line = new THREE.Line3(start, end);
+        const material = new THREE.LineBasicMaterial({color : 0xffffff});
+
+        const points = [new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z), 
+            new THREE.Vector3(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z)];
+        
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, material);
 
         return line;
-    }
-
-
-    detectIntersection(box){
-        if (box.intersectsLine(line)){
-            console.log("collision");
-        }
     }
 
     sleep(ms){

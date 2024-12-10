@@ -154,7 +154,7 @@ const raycaster = new THREE.Raycaster();
 const plantImages = [
     './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
     './Textures/Snowpea_Seed_Packet.jpg',    // Snowpea 
-    './Textures/Sun_Flower_Seed_Peacket.jpg' // Sunflower 
+    './Textures/sunflowerSeedPacket.jpg' // Sunflower 
 ];
 const boxes = document.querySelectorAll('.plantBox');
 let selectedPlant = false;
@@ -386,6 +386,7 @@ function onClick(event) {
                 });
 
                 scene.add(currPlant.generatePlant());  // Add the plant to the scene
+                scene.add(currPlant.generateDetectionZone());
 
                 // Update the sun count based on plant cost
                 updateSunCount(currPlant.getCost());

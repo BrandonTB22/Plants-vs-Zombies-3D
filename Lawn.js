@@ -10,10 +10,11 @@ class Lawn{
 
         this.lawnTile;
         this.material;
-        this.tiles = [[], [], [], [], []];
-        this.occupiedTiles = [];
+        this.tiles = [[], [], [], [], []]; // Create a 2d array to keep track of tile position
+        this.occupiedTiles = []; // Tiles that have plants on them
     }
 
+    // Create the lawn
     generateLawn(){
         
         for (let i = 0; i < 5; i++){ // Each row
@@ -38,10 +39,6 @@ class Lawn{
             }
         }
         return this.tiles;
-    }
-
-    getLawnTileAtPosition(){
-
     }
 
     occupyTile(tile){
