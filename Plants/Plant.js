@@ -9,9 +9,7 @@ class Plant {
         this.lawn = lawn;  // Any reference to the lawn if needed
     }
 
-    setPosition(x, y, z) {
-        this.position.set(x, y, z);  // Set position using THREE.Vector3's set method
-    }
+
 
     generatePlant() {
         // Return a 3D mesh or object representing the plant

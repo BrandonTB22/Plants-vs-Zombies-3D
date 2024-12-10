@@ -205,9 +205,6 @@ audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     levelMusic.setVolume(0.5);
 });
 
-let rep = new Repeater('repeater', 200, 100);
-rep.generatePlant(scene);
-
 function checkForPlant(name){
     removedPlants.forEach(plant => {
         if (plant.getName() == name){
@@ -403,19 +400,28 @@ function onClick(event) {
                     soundEffect2.play();
                 });
 
-                console.log(currPlant.generatePlant());
-                scene.add(currPlant.generatePlant());  // Add the plant to the scene
-               
+ 
+                // Add the plant to the scene
+                (async () => {
+                    try {
+                        const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
+                        scene.add(model);
+                    } catch (error) {
+                        console.error("Failed to add model to the scene", error);
+                    }
+                })();
+            
 
                 // Update the sun count based on plant cost
                 // updateSunCount(currPlant.getCost());
 
-                // Fix the variable typo
-                currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
-                
-                let peas = currPlant.generatePeas();
-                scene.add(peas[0]);
-                scene.add(peas[1]);
+                /*
+                if (currPlant.getName() == 'peashooter'){
+                    let peas = currPlant.generatePeas();
+                    scene.add(peas[0]);
+                    scene.add(peas[1]);
+                };
+                */
                 
                 lawn.occupyTile(clickedObj);
                 raycasting = false;
