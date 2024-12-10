@@ -1,0 +1,11 @@
+Model Information:
+* title:	PvZ Sunflower in a Pot
+* source:	https://sketchfab.com/3d-models/pvz-sunflower-in-a-pot-3e38e8351c6e48e786cdd8bd181a09db
+* author:	gamertturtle (https://sketchfab.com/gamertturtle)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "PvZ Sunflower in a Pot" (https://sketchfab.com/3d-models/pvz-sunflower-in-a-pot-3e38e8351c6e48e786cdd8bd181a09db) by gamertturtle (https://sketchfab.com/gamertturtle) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
