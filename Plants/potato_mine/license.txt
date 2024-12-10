@@ -1,0 +1,11 @@
+Model Information:
+* title:	Potato mine
+* source:	https://sketchfab.com/3d-models/potato-mine-e5875a85c4cf4935a747d1bb79f4b173
+* author:	hiandhello (https://sketchfab.com/Lolzozohi)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Potato mine" (https://sketchfab.com/3d-models/potato-mine-e5875a85c4cf4935a747d1bb79f4b173) by hiandhello (https://sketchfab.com/Lolzozohi) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

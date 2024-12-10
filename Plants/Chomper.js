@@ -32,7 +32,7 @@ class Chomper extends Plant{
     
 }
 
-export {Repeater}
+export {Chomper}
 
 
 
