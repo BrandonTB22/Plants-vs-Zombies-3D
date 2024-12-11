@@ -2,13 +2,14 @@ import * as THREE from 'three';
 
 // Class to deal with the sun spheres and values
 export class SunSystem{
-    constructor(scene, sunCounterElement, lawnBounds) {
+    constructor(scene, sunCounterElement, lawnBounds, camera) {
         this.scene = scene; // Reference to the scene
         this.sunCounterElement = sunCounterElement; // Reference to the sun energy display in the GUI
         this.suns = []; // Pool of sun spheres
         this.activeSuns = []; // Track active suns
         this.sunValue = 25; // Amount of energy per sphere
         this.lawnBounds = lawnBounds; // { xMin, xMax, zMin, zMax } to define the spawning area
+        this.camera = camera; // Needed for raycasting
 
         // Create the pool of two sun spheres
         for (let i = 0; i < 2; i++) {
@@ -30,55 +31,74 @@ export class SunSystem{
 
     // Spawn a sun at a random position in the grass bounds
     spawnSun() {
-        // Find an available sun from the pool
+    // Find an available sun from the pool
     const sun = this.suns.find((s) => !s.visible);
 
     if (sun) {
-        // Randomize the position within lawn bounds
-        sun.position.set(
-            THREE.MathUtils.randFloat(this.lawnBounds.xMin, this.lawnBounds.xMax),
-            50, // Spawn height above the scene
-            THREE.MathUtils.randFloat(this.lawnBounds.zMin, this.lawnBounds.zMax)
-        );
+         // Randomize the position within lawn bounds
+         const x = THREE.MathUtils.randFloat(this.lawnBounds.xMin, this.lawnBounds.xMax);
+         const z = THREE.MathUtils.randFloat(this.lawnBounds.zMin, this.lawnBounds.zMax);
+         const startY = 50; // Spawn height above the lawn
+         const endY = 7; // Lawn level
 
-        // Make the sun visible and add to active suns
-        sun.visible = true;
-        this.activeSuns.push(sun);
+         sun.position.set(x, startY, z);
+         sun.visible = true;
+         this.activeSuns.push(sun);
+
+         // Animate the falling motion
+         this.animateFall(sun, endY);
         }
     }
 
-    // Update sun positions and remove if clicked
-    update(delta) {
-        // Move active suns downward
-        this.activeSuns.forEach((sun) => {
-            sun.position.y -= 10 * delta; // Fall speed
-            if (sun.position.y < -5) {
-                // If sun falls below the ground then reset it
-                sun.visible = false;
-                this.activeSuns = this.activeSuns.filter((activeSun) => activeSun !== sun);
+    animateFall(sun, endY) {
+        const fallSpeed = 0.5; // Speed of falling
+        const fallAnimation = () => {
+            if (sun.position.y > endY) {
+                sun.position.y -= fallSpeed; // Move sun down
+                requestAnimationFrame(fallAnimation); // Continue animation
+            } else {
+                // Sun has reached the lawn level, start despawn timer
+                sun.position.y = endY; // Ensure it stops exactly on the lawn
+                setTimeout(() => {
+                    if (sun.visible) {
+                        this.despawnSun(sun);
+                    }
+                }, 5000); // 5 second timer
             }
-        });
+        };
+
+        fallAnimation();
     }
 
-    // Handle clicks on the suns
+    despawnSun(sun) {
+        // Hide the sun and remove it from active suns
+        sun.visible = false;
+
+        const index = this.activeSuns.indexOf(sun);
+        if (index !== -1) {
+            this.activeSuns.splice(index, 1);
+        }
+    }
+
     handleClick(event) {
-        // Normalize mouse position
+        // Update mouse position for raycasting
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-        // Update raycaster
-        this.raycaster.setFromCamera(this.mouse, camera);
-
-        // Check for intersections with suns
+        // Perform raycasting to detect suns
+        this.raycaster.setFromCamera(this.mouse, this.camera);
         const intersects = this.raycaster.intersectObjects(this.activeSuns);
+
         if (intersects.length > 0) {
             const clickedSun = intersects[0].object;
-            clickedSun.visible = false; // Hide the clicked sun
-            this.activeSuns = this.activeSuns.filter((sun) => sun !== clickedSun); // Remove from active list
-
-            // Add sun value to the GUI
-            const currentSunCount = parseInt(this.sunCounterElement.textContent, 10) || 0;
-            this.sunCounterElement.textContent = currentSunCount + this.sunValue;
+            this.despawnSun(clickedSun); // Despawn the clicked sun
+            this.updateSunEnergy(); // Add energy
         }
+    }
+
+    updateSunEnergy() {
+        // Update the GUI sun counter
+        const currentEnergy = parseInt(this.sunCounterElement.textContent, 10);
+        this.sunCounterElement.textContent = currentEnergy + this.sunValue;
     }
 }
