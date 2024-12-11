@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 // Class to deal with the sun spheres and values
-class SunSystem{
+export class SunSystem{
     constructor(scene, sunCounterElement) {
         this.scene = scene; // Reference to the scene
         this.sunCounterElement = sunCounterElement; // Reference to the sun energy display in the GUI
@@ -11,7 +11,7 @@ class SunSystem{
 
         // Create the pool of two sun spheres
         for (let i = 0; i < 2; i++) {
-            const sunGeometry = new THREE.SphereGeometry(5, 16, 16);
+            const sunGeometry = new THREE.SphereGeometry(5/3, 16, 16);
             const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
             const sun = new THREE.Mesh(sunGeometry, sunMaterial);
             sun.visible = false; // Initially hide the suns
