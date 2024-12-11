@@ -183,7 +183,13 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 
-var game = new GameLogic(scene);
+// Update the sun count when planted
+function updateSunCount(amount){
+    const text = document.getElementById('sunText');
+
+    text.textContent = text.textContent - amount;
+}
+var game = new GameLogic(scene, lawn);
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -336,13 +342,6 @@ boxes.forEach((box, index) => {
 var basicZombie = new BasicZombie('basic', 1000);
 const zombieUpdateFns = [];
 
-basicZombie.loadBasicZombie(scene).then((updateFn) => {
-    zombieUpdateFns.push(updateFn); // Assign the update function when the promise resolves
-}).catch((error) => {
-    console.error("Error loading the zombie:", error);
-});
-
-
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
@@ -409,12 +408,6 @@ setInterval(() => {
     sunSystem.spawnSun();
 }, 10000); // 10 seconds
 
-// Update the sun count when planted
-function updateSunCount(amount){
-    const text = document.getElementById('sunText');
-
-    text.textContent = text.textContent - amount;
-}
 
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
@@ -476,9 +469,6 @@ function onClick(event) {
                 // Update the sun count based on plant cost
                 // updateSunCount(currPlant.getCost());
 
-                
-          
-                
                 lawn.occupyTile(clickedObj);
                 raycasting = false;
                 plantSelected = false;
@@ -489,6 +479,7 @@ function onClick(event) {
 
 // Zombies to animate
 let zombies = game.transferZombies();
+let activeZombies = [];
 
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
@@ -508,16 +499,40 @@ function animate() {
         }).catch((error) => {
             console.error("Error loading the zombie:", error);
         });
+
+        activeZombies.push(zombies[i]);
         zombies.splice(zombies[i], 1);
     }
+    
+    plantsActive.forEach((plant) => {
+        if (plant.getName() == 'peashooter'){
+            if (activeZombies.length > 0) {
+                activeZombies.forEach((zombie) => {
+                    try {
+                        plant.detectZombie(zombie.model.getObjectByName("hitbox"));
+                    } catch (error){
+                        console.error("Error getting child. Trying again... ", error);
+                    }
+                    
+               
+                })
+            }
+        }
+    })
+
+    activeZombies.forEach((zombie) => {
+        zombie.updateZombiePosition();
+
+    })
     // Set tile to normal color unless raycasting
     tiles.forEach(tile => {
         tile.material.emissive.setHex(0x000000);
+        
     });
     if (raycasting){
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(tiles);
+        let intersects = raycaster.intersectObjects(tiles);
         for (let i = 0; i < intersects.length; i++){
          
             intersects[0].object.material.emissive.setHex(0x505050);

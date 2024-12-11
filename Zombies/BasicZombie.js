@@ -1,12 +1,17 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
+import THREE from '../threejsModule';
 
 class BasicZombie {
-    constructor(type, health, laneNum){
+    constructor(type, health){
         this.type = type;
         this.health = health;
-        this.laneNum = laneNum;
         this.model;
+        this.spawns = [0, 10, 15, 20, 25]
+
+        this.rand = Math.floor(Math.random() * this.spawns.length)
+        this.lane = this.spawns[this.rand];
+
     }
 
 getType(){
@@ -15,7 +20,7 @@ getType(){
 
 updateZombiePosition(){
     if (this.model != null){
-        this.model.position.x -= 0.01;
+        this.model.position.x -= 0.1;
     }
 }
 
@@ -31,7 +36,8 @@ loadBasicZombie(scene) {
             '/Zombies/zombie/scene.gltf', // Path to the model
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
-                zombie.position.set(45, 5, 30); // Position in the center of the scene
+                console.log(this.lane);
+                zombie.position.set(90, 5, this.lane); // Position in the center of the scene
                 zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
@@ -41,9 +47,18 @@ loadBasicZombie(scene) {
                 // Update the zombie's rotation to face the camera
                 const rotation = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 2), direction);
                 zombie.quaternion.copy(rotation); // Apply the rotation to the zombie
+                
+                const geo = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+                const material = new THREE.MeshBasicMaterial({color : 0xffffff});
+                const hitBox = new THREE.Mesh(geo, material);
+                hitBox.rotation.y = 1.5;
+                
+                hitBox.name = "hitbox";
+                zombie.add(hitBox);
                 this.model = zombie;
                 scene.add(zombie);
-
+            
+                // console.log(zombie.getObjectByName('hitbox'));
                 // Extract nodes by their names
                 const nodes = {};
                 zombie.traverse((child) => {
