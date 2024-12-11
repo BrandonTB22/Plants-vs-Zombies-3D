@@ -1,0 +1,11 @@
+Model Information:
+* title:	Repeater
+* source:	https://sketchfab.com/3d-models/repeater-e12beb2008d348a9b48e6d2beb2121b1
+* author:	davibernardino (https://sketchfab.com/davibernardino)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Repeater" (https://sketchfab.com/3d-models/repeater-e12beb2008d348a9b48e6d2beb2121b1) by davibernardino (https://sketchfab.com/davibernardino) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
