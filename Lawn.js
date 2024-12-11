@@ -59,6 +59,17 @@ class Lawn{
             return false;
         }
     }
+
+    // Get the lawn's x and z bounds for sun spawning
+    getLawnBounds() {
+        const minX = 0; // First column starts at x = 0
+        const maxX = this.sizeX * (this.tiles[0].length - 1); // Last column's x position
+
+        const minZ = 0; // First row starts at z = 0
+        const maxZ = this.sizeZ * (this.tiles.length - 1); // Last row's z position
+
+        return { minX, maxX, minZ, maxZ };
+    }
 }
 
 export {Lawn}

@@ -183,23 +183,6 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 var light = new THREE.AmbientLight(0xffffff);
 scene.add(light);
 
-// Reference the sun count element in the GUI
-const sunCounterElement = document.getElementById('sunText');
-
-// Instantiate the SunSystem
-const sunSystem = new SunSystem(scene, sunCounterElement);
-
-// Spawn suns every 15 seconds
-setInterval(() => {
-    sunSystem.spawnSun();
-}, 7500);
-
-// Update the sun count when planted
-function updateSunCount(amount){
-    const text = document.getElementById('sunText');
-
-    text.textContent = text.textContent - amount;
-}
 var game = new GameLogic(scene);
 
 // Load the audio
@@ -407,6 +390,31 @@ tiles.forEach(tile => {
         console.log("tile clicked");
     });
 });
+
+// Reference the sun count element in the GUI
+const sunCounterElement = document.getElementById('sunText');
+
+const lawnBounds = {
+    xMin: lawn.tiles[0][0].position.x, // First tile in the first row
+    xMax: lawn.tiles[0][lawn.tiles[0].length - 1].position.x, // Last tile in the first row
+    zMin: lawn.tiles[0][0].position.z, // First row
+    zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
+};
+
+// Instantiate the SunSystem
+const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds);
+
+// Spawn suns every 15 seconds
+setInterval(() => {
+    sunSystem.spawnSun();
+}, 7500);
+
+// Update the sun count when planted
+function updateSunCount(amount){
+    const text = document.getElementById('sunText');
+
+    text.textContent = text.textContent - amount;
+}
 
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations

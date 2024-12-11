@@ -2,12 +2,13 @@ import * as THREE from 'three';
 
 // Class to deal with the sun spheres and values
 export class SunSystem{
-    constructor(scene, sunCounterElement) {
+    constructor(scene, sunCounterElement, lawnBounds) {
         this.scene = scene; // Reference to the scene
         this.sunCounterElement = sunCounterElement; // Reference to the sun energy display in the GUI
         this.suns = []; // Pool of sun spheres
         this.activeSuns = []; // Track active suns
         this.sunValue = 25; // Amount of energy per sphere
+        this.lawnBounds = lawnBounds; // { xMin, xMax, zMin, zMax } to define the spawning area
 
         // Create the pool of two sun spheres
         for (let i = 0; i < 2; i++) {
@@ -29,14 +30,20 @@ export class SunSystem{
 
     // Spawn a sun at a random position in the grass bounds
     spawnSun() {
-        const sun = this.suns.find((sun) => !sun.visible); // Get an available sun
-        if (sun) {
-            const x = Math.random() * 100 - 50; // Random X position
-            const z = Math.random() * 100 - 50; // Random Z position
-            const y = 50; // Initial Y position (above the screen)
-            sun.position.set(x, y, z);
-            sun.visible = true; // Show the sun
-            this.activeSuns.push(sun); // Track active sun
+        // Find an available sun from the pool
+    const sun = this.suns.find((s) => !s.visible);
+
+    if (sun) {
+        // Randomize the position within lawn bounds
+        sun.position.set(
+            THREE.MathUtils.randFloat(this.lawnBounds.xMin, this.lawnBounds.xMax),
+            50, // Spawn height above the scene
+            THREE.MathUtils.randFloat(this.lawnBounds.zMin, this.lawnBounds.zMax)
+        );
+
+        // Make the sun visible and add to active suns
+        sun.visible = true;
+        this.activeSuns.push(sun);
         }
     }
 
