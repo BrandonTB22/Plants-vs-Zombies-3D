@@ -488,6 +488,12 @@ window.addEventListener('mousemove', OnMouseMove, false);
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
+
+    const delta = clock.getDelta(); // Get the time delta for the frame
+
+    // Update the SunSystem for falling suns
+    sunSystem.update(delta);
+
     basicZombie.updateZombiePosition();
     
     for (let i = 0; i < zombies.length; i++){
