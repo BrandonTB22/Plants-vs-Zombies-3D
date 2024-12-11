@@ -2,17 +2,19 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import {Plant} from './Plant.js';
+import { mod } from 'three/webgpu';
 
 // Name: peashooter; Cost: 100 sun
 class Peashooter extends Plant {
     constructor(name, health, cost, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ) {
         super(name, cost, health, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ); // Pass all parameters to the Plant constructor
           // Additional properties for Peashooter
-        this.peashooter;
-        this.pea;
+        this.raycaster = new THREE.Raycaster();
+        this.peagenerated = false;
+        this.intersects;
         this.count = 0;
         this.availablePeas = [];
-        this.finishedPeas = [];
+
     }
 
     getCost(){
@@ -39,46 +41,65 @@ class Peashooter extends Plant {
 
 
     generateDetectionZone(){
-        const geo = new THREE.BoxGeometry();
+        const geo = new THREE.BoxGeometry(70 - this.model.position.x, 5, 5);
+        const material = new THREE.MeshBasicMaterial({color : 0xffffff});
+        const box = new THREE.Mesh(geo, material);
+        box.position.set(this.model.position.x + box.geometry.parameters.width / 2, this.model.position.y, this.model.position.z);
 
-        return line;
-    }
-
-
-    detectIntersection(box){
-        if (box.intersectsLine(line)){
-            console.log("collision");
-        }
+        return box;
     }
 
     sleep(ms){
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    shootPea(){
+    shootPea(target){
+        const speed = 1;
+        let pea;
         
-        let timeStep = 0.4; // How fast the peas move
-        let coolDown = 1000; // Time betweens peas shots (miliseconds)
-        let maxDistance = 70; // When the pea will be returned to the pool
-        let pea1 = this.availablePeas[0];
-        let startPos = this.model.position.x;
-        
-      
-        if (pea1.position.x <= maxDistance){
-            pea1.visible = true;
-            pea1.position.x += timeStep;
-        } else if (pea1.position.x > maxDistance){
-            pea1.visible = false;
-            setTimeout(() => {
-               
-                pea1.position.x = startPos;
-            }, coolDown);
-           
+        if (this.peagenerated == false){
+            pea = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshBasicMaterial({ color : 0x00ff00}));
+            this.availablePeas.push(pea);
+            this.peagenerated = true;
+        } else {
+            pea = this.availablePeas[0];
         }
+
+            if (target.position != null){
+                let direction = new THREE.Vector3().subVectors(target.position, this.peashooter.position).normalize();
+            
+            if (pea.position.distanceTo(target.position) < 0.5){
+                pea.visible= false;
+            } else {
+                // Move the pea
+                pea.position.add(direction.clone().multiplyScalar(speed));
+            }
+        }
+    }
+      
+    detectZombie(zombies){
+        
+        const forward = new THREE.Vector3(1.5, 0, 0);
+        if (this.model != null){
+            const origin = this.model.position;
+        }
+    
+        this.raycaster.set(origin, forward);
+
+        this.intersects = this.raycaster.intersectObjects(zombies);
+        
+        if (this.intersects.length > 0){
+            console.log("zombie detected");
+
+            this.shootPea(this.intersects[0].object);
+        }
+    
+      
+    }
             
 
     }
-}
+
     
         
 
