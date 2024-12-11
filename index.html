@@ -506,17 +506,16 @@ function animate() {
     plantsActive.forEach((plant) => {
         if (plant.getName() == 'peashooter'){
             if (activeZombies.length > 0) {
-                activeZombies.forEach((zombie) => {
+
                     try {
-                        scene.add(plant.shootPea(zombie.model.getObjectByName('hitbox')));
-                        // plant.detectZombie(zombie.model.getObjectByName('hitbox'));
+                        for (let i = 0; i < activeZombies.length; i++){
+                            scene.add(plant.shootPea(activeZombies[i]));
+                            plant.reduceZombieHealth(activeZombies[i]);
+                         }
 
                     } catch (error){
                         console.error("Error getting child. Trying again... ", error);
                     }
-                    
-               
-                })
             }
         }
     })
