@@ -17,7 +17,7 @@ class GameLogic{
 
         // Begin with an initial zombie
         setTimeout(() => {
-            let basicZombie = new BasicZombie('basic', 200);
+            let basicZombie = new BasicZombie('basic', 200, this.scene);
             this.transfer.push(basicZombie);
             this.zombiesActive.push(basicZombie);
             

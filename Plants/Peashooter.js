@@ -78,6 +78,7 @@ class Peashooter extends Plant {
         let zombie = target;
         let tar = target.model.getObjectByName('hitbox');
        
+       
         const speed = 0.3;
         const maxPos = 74;
         const coolDown = 2000;
@@ -96,11 +97,17 @@ class Peashooter extends Plant {
             this.availablePeas.push(this.pea);
           
             
-        } else {
+        } 
+        
+        if (intersects.length > 0 && zombie.getHealth() > 0){
+            this.pea.visible = true;
+            console.log("zombie was detected");
             
-            if (intersects.length > 0){
-                this.pea.visible = true;
-                console.log("zombie was detected");
+            if (zombie.getHealth() <= 0) {
+                intersects.splice(intersects[0], 1);
+                tar.position.set(0, -100, 0);
+                
+            }
                 
                 if (this.pea.position.x > maxPos){
                     this.pea.visible = false;
@@ -111,25 +118,26 @@ class Peashooter extends Plant {
                     }, coolDown)
                 
                     
-                } else if (intersects[0].point.x <= this.pea.position.x){
+                } else if (intersects[0].point.x <= this.pea.position.x && intersects){
                         console.log(zombie.getHealth);
                         
                         this.pea.visible = false;
                         setTimeout(() => {
+                            zombie.reduceHealth(100);
                             
                             this.pea.position.x = this.model.position.x;
                             this.pea.visible = false;
                         }, coolDown)
-                        zombie.reduceHealth(100);
-                      
+                       
                         
-                }else {
+                }
+                else {
                     
                     this.pea.position.x += speed;
                 }
             } 
         
-        }
+        
         
         return this.pea;
        

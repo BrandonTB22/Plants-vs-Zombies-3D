@@ -5,11 +5,12 @@ import { userData } from 'three/webgpu';
 import { GameLogic } from '../GameLogic';
 
 class BasicZombie {
-    constructor(type, health){
+    constructor(type, health, scene){
         this.type = type;
         this.health = 200;
         this.model;
         this.spawns = [0, 12, 17, 20, 25]
+        this.scene = scene;
 
         this.rand = Math.floor(Math.random() * this.spawns.length)
         this.lane = this.spawns[this.rand];
@@ -39,7 +40,9 @@ reduceHealth(ammount){
     console.log(this.health);
 
     if (this.health <= 0){
-        this.model.visible = false;
+        
+        this.scene.remove(this.model);
+        // this.model.position.set(0, 0, 0);
     }
 }
 
