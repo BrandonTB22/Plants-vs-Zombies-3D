@@ -145,9 +145,11 @@ import {Snowpea} from './Plants/Snowpea.js'
 import {Repeater} from './Plants/Repeater.js'
 import {Chomper} from './Plants/Chomper.js'
 import {Potatomine} from './Plants/Potatomine.js'
+import {Walnut} from './Plants/Walnut.js'
 import Sunflower from './Plants/Sunflower.js'; 
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
+import { loadConeheadZombie } from './Zombies/ConeheadZombie.js'; // Import the model file of conehead zombie
 
 
 let raycasting = false;
@@ -367,6 +369,13 @@ loadBasicZombie(scene).then((updateFn) => {
     console.error("Error loading the zombie:", error);
 });
 
+let updateAnimation2; // This will hold the animation update function
+// Load the zombie model and get the animation update function
+loadConeheadZombie(scene).then((updateFn) => {
+    updateAnimation2 = updateFn; // Assign the update function when the promise resolves
+}).catch((error) => {
+    console.error("Error loading the zombie:", error);
+});
 
 // Mouse movements 
 const mouse = new THREE.Vector2();
@@ -459,6 +468,7 @@ function animate() {
 
     const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available
+    if (updateAnimation2) updateAnimation2(delta); // Call the update function if available
 
     renderer.render(scene, camera); // Render the scene
 }
