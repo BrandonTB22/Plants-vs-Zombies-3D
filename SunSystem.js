@@ -96,6 +96,7 @@ export class SunSystem{
         }
     }
 
+
     updateSunEnergy() {
         // Update the GUI sun counter
         const currentEnergy = parseInt(this.sunCounterElement.textContent, 10);

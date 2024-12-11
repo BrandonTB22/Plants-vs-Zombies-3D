@@ -299,6 +299,9 @@ boxes.forEach((box, index) => {
             if (removedPlants.length == 0 || checkForPlant('sunflower') == false) {
                 sunflower = new Sunflower ('sunflower', 50, 100, 'Plants/sunflower/scene.gltf', 0, -3.3, -3,    0, 0, 0,     0.4, 0.4, 0.4);
                 plants.push(sunflower);
+                sunflower.generateSunPool();
+                sunflower.setCounter(sunCounterElement);
+                sunflower.setCamera(camera);
             } else {
                 plants.push(checkForPlant('sunflower'));
             }
@@ -483,6 +486,7 @@ let activeZombies = [];
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
 
+let elapsedTimed = 0;
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
@@ -509,14 +513,30 @@ function animate() {
 
                     try {
                         for (let i = 0; i < activeZombies.length; i++){
+                            
                             scene.add(plant.shootPea(activeZombies[i]));
-                            plant.reduceZombieHealth(activeZombies[i]);
+                         
                          }
 
                     } catch (error){
                         console.error("Error getting child. Trying again... ", error);
                     }
             }
+        }
+
+        if (plant.getName() == 'sunflower'){
+            elapsedTimed += delta;
+            
+          
+            // Give sun every 24 seconds
+            if (elapsedTimed >= 24){
+                scene.add(plant.giveSun());
+               
+                elapsedTimed = 0;
+            }
+                
+            
+           
         }
     })
 

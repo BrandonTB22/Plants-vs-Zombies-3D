@@ -12,7 +12,8 @@ class Peashooter extends Plant {
           // Additional properties for Peashooter
         this.raycaster = new THREE.Raycaster();
         this.peagenerated = false;
-        this.count = 0;
+        this.shootCooldown = 1000;
+        this.lastTimeShot = 0;
         this.zombie;
         this.availablePeas = [];
         this.pea
@@ -73,11 +74,15 @@ class Peashooter extends Plant {
         console.log(zombie.getHealth());
     }
 
+    canShoot(){
+        return Date.now() - this.lastTimeShot >= this.shootCooldown;
+    }
+
 
     shootPea(target){
         let zombie = target;
         let tar = target.model.getObjectByName('hitbox');
-       
+        let zombieHit;
        
         const speed = 0.3;
         const maxPos = 74;
@@ -118,21 +123,28 @@ class Peashooter extends Plant {
                     }, coolDown)
                 
                     
-                } else if (intersects[0].point.x <= this.pea.position.x && intersects){
-                        console.log(zombie.getHealth);
-                        
+                } else if (intersects[0].point.x <= this.pea.position.x){
+               
                         this.pea.visible = false;
-                        setTimeout(() => {
-                            zombie.reduceHealth(100);
-                            
-                            this.pea.position.x = this.model.position.x;
-                            this.pea.visible = false;
-                        }, coolDown)
-                       
-                        
+                      
+                           
+
+                            setTimeout(() => {
+                                this.pea.position.x = this.model.position.x;
+                                this.pea.visible = false;
+                                     // Make sure the function only runs once
+                                for (let i = 0; i < 1; i++){
+                                    //zombie.reduceHealth(100);
+                                    console.log("reduced health");
+                                    console.log(zombie.getHealth());
+                                }
+                            },coolDown);
+                          
+
+                            return;
                 }
                 else {
-                    
+                   
                     this.pea.position.x += speed;
                 }
             } 

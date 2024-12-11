@@ -7,9 +7,9 @@ import { GameLogic } from '../GameLogic';
 class BasicZombie {
     constructor(type, health, scene){
         this.type = type;
-        this.health = 200;
+        this.health = 500;
         this.model;
-        this.spawns = [0, 12, 17, 20, 25]
+        this.spawns = [0, 8, 16, 24, 32]
         this.scene = scene;
 
         this.rand = Math.floor(Math.random() * this.spawns.length)
@@ -55,7 +55,7 @@ loadBasicZombie(scene) {
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
                 console.log(this.lane);
-                zombie.position.set(90, 5, this.spawns[0]); // Position in the center of the scene
+                zombie.position.set(90, 5, this.lane); // Position in the center of the scene
                 zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
@@ -72,6 +72,7 @@ loadBasicZombie(scene) {
                 hitBox.rotation.y = 1.5;
                 
                 hitBox.name = "hitbox";
+                hitBox.visible = false;
                 zombie.add(hitBox);
                 
                 this.model = zombie;
