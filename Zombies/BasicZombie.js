@@ -1,11 +1,13 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
 import THREE from '../threejsModule';
+import { userData } from 'three/webgpu';
+import { GameLogic } from '../GameLogic';
 
 class BasicZombie {
     constructor(type, health){
         this.type = type;
-        this.health = health;
+        this.health = 200;
         this.model;
         this.spawns = [0, 12, 17, 20, 25]
 
@@ -18,6 +20,10 @@ getType(){
     return this.type;
 }
 
+getHealth(){
+    return this.health;
+}
+
 updateZombiePosition(){
     if (this.model != null){
         this.model.position.x -= 0.05;
@@ -26,6 +32,15 @@ updateZombiePosition(){
 
 setToSpawnPosition(x, y, z){
     this.model.position.set(x, y, z);
+}
+
+reduceHealth(ammount){
+    this.health -= ammount;
+    console.log(this.health);
+
+    if (this.health <= 0){
+        this.model.visible = false;
+    }
 }
 
 loadBasicZombie(scene) {
@@ -55,10 +70,10 @@ loadBasicZombie(scene) {
                 
                 hitBox.name = "hitbox";
                 zombie.add(hitBox);
+                
                 this.model = zombie;
                 scene.add(zombie);
-            
-                // console.log(zombie.getObjectByName('hitbox'));
+        
                 // Extract nodes by their names
                 const nodes = {};
                 zombie.traverse((child) => {

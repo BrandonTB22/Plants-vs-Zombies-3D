@@ -2,6 +2,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import {Plant} from './Plant.js';
+import { max } from 'three/webgpu';
 
 
 // Name: peashooter; Cost: 100 sun
@@ -12,8 +13,9 @@ class Peashooter extends Plant {
         this.raycaster = new THREE.Raycaster();
         this.peagenerated = false;
         this.count = 0;
+        this.zombie;
         this.availablePeas = [];
-        this.peal
+        this.pea
 
     }
 
@@ -67,7 +69,15 @@ class Peashooter extends Plant {
         return splatSound.play();
     }
 
+    reduceZombieHealth(zombie){
+        console.log(zombie.getHealth());
+    }
+
+
     shootPea(target){
+        let zombie = target;
+        let tar = target.model.getObjectByName('hitbox');
+       
         const speed = 0.3;
         const maxPos = 74;
         const coolDown = 2000;
@@ -75,7 +85,7 @@ class Peashooter extends Plant {
         const forward = new THREE.Vector3(1, 0, 0);
 
         this.raycaster.set(origin, forward);
-        let intersects = this.raycaster.intersectObject(target);
+        let intersects = this.raycaster.intersectObject(tar);
 
         if (this.availablePeas.length <  1){
             const geo = new THREE.SphereGeometry(1, 10, 10);
@@ -92,15 +102,28 @@ class Peashooter extends Plant {
                 this.pea.visible = true;
                 console.log("zombie was detected");
                 
-
-                if (this.pea.position.x > maxPos || intersects[0].point.x < this.pea.position.x){
+                if (this.pea.position.x > maxPos){
                     this.pea.visible = false;
                     setTimeout(() => {
+                        
                         this.pea.position.x = this.model.position.x;
                         this.pea.visible = false;
                     }, coolDown)
-
-                } else {
+                
+                    
+                } else if (intersects[0].point.x <= this.pea.position.x){
+                        console.log(zombie.getHealth);
+                        
+                        this.pea.visible = false;
+                        setTimeout(() => {
+                            
+                            this.pea.position.x = this.model.position.x;
+                            this.pea.visible = false;
+                        }, coolDown)
+                        zombie.reduceHealth(100);
+                      
+                        
+                }else {
                     
                     this.pea.position.x += speed;
                 }

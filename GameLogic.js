@@ -3,9 +3,10 @@ import { BasicZombie } from "./Zombies/BasicZombie";
 class GameLogic{
     constructor(scene, lawn){
         this.transfer =[];
-        this.zombies = [];
+        this.zombiesActive = [];
+        this.availableZombies = [];
         this.plants = [];
-        this.scene =scene;
+        this.scene = scene;
         this.lawn = lawn;
     }
 
@@ -16,9 +17,9 @@ class GameLogic{
 
         // Begin with an initial zombie
         setTimeout(() => {
-            let basicZombie = new BasicZombie('basic', 1000);
+            let basicZombie = new BasicZombie('basic', 200);
             this.transfer.push(basicZombie);
-            this.zombies.push(basicZombie);
+            this.zombiesActive.push(basicZombie);
             
         }, 5000)
 
@@ -27,6 +28,10 @@ class GameLogic{
 
     transferZombies(){
         return this.transfer;
+    }
+
+    returnZombie(zombie){
+        this.availableZombies.push(zombie);
     }
 
     endGame(){
