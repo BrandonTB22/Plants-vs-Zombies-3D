@@ -137,6 +137,7 @@
 import THREE from './threejsModule.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SoundHandler} from './SoundHandler.js';
+import { SunSystem } from './SunSystem.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
@@ -389,6 +390,31 @@ tiles.forEach(tile => {
     });
 });
 
+// Reference the sun count element in the GUI
+const sunCounterElement = document.getElementById('sunText');
+
+const lawnBounds = {
+    xMin: lawn.tiles[0][0].position.x, // First tile in the first row
+    xMax: lawn.tiles[0][lawn.tiles[0].length - 1].position.x, // Last tile in the first row
+    zMin: lawn.tiles[0][0].position.z, // First row
+    zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
+};
+
+// Instantiate the SunSystem
+const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds);
+
+// Spawn suns every 15 seconds
+setInterval(() => {
+    sunSystem.spawnSun();
+}, 7500);
+
+// Update the sun count when planted
+function updateSunCount(amount){
+    const text = document.getElementById('sunText');
+
+    text.textContent = text.textContent - amount;
+}
+
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
 
@@ -467,6 +493,13 @@ window.addEventListener('mousemove', OnMouseMove, false);
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
+
+    const delta = clock.getDelta(); // Get the time delta for the frame
+
+    // Update the SunSystem for falling suns
+    sunSystem.update(delta);
+
+    basicZombie.updateZombiePosition();
     
     for (let i = 0; i < zombies.length; i++){
 
@@ -516,7 +549,6 @@ function animate() {
         
     }
 
-    const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available
 
     zombieUpdateFns.forEach((updateFn) =>{
