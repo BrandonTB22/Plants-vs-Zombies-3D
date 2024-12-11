@@ -21,6 +21,12 @@ getType(){
     return this.type;
 }
 
+eatPlant(plant){
+    if (this.model.getObjectById('hitbox').position.x < Math.abs(plant.position.x + 3)){
+        console.log("Eating plant");
+    }
+}
+
 getHealth(){
     return this.health;
 }

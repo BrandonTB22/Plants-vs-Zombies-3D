@@ -15,6 +15,7 @@ class Peashooter extends Plant {
         this.shootCooldown = 1000;
         this.lastTimeShot = 0;
         this.zombie;
+        this.health;
         this.availablePeas = [];
         this.pea
 
@@ -22,6 +23,10 @@ class Peashooter extends Plant {
 
     getCost(){
         return this.cost;
+    }
+
+    setHealth(){
+        this.health = 100;
     }
     getHealth(){
         return this.health;
@@ -78,7 +83,6 @@ class Peashooter extends Plant {
         return Date.now() - this.lastTimeShot >= this.shootCooldown;
     }
 
-
     shootPea(target){
         let zombie = target;
         let tar = target.model.getObjectByName('hitbox');
@@ -126,9 +130,7 @@ class Peashooter extends Plant {
                 } else if (intersects[0].point.x <= this.pea.position.x){
                
                         this.pea.visible = false;
-                      
-                           
-
+              
                             setTimeout(() => {
                                 this.pea.position.x = this.model.position.x;
                                 this.pea.visible = false;

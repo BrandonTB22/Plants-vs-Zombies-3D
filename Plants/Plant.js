@@ -56,6 +56,7 @@ class Plant {
     reduceHealth(currHealth) {
         // Placeholder for reducing health logic
         this.health -= currHealth;
+        console.log(currHealth);
     }
 
     removePlant() {
