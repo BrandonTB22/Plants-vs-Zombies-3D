@@ -408,12 +408,6 @@ setInterval(() => {
     sunSystem.spawnSun();
 }, 7500);
 
-// Update the sun count when planted
-function updateSunCount(amount){
-    const text = document.getElementById('sunText');
-
-    text.textContent = text.textContent - amount;
-}
 
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
