@@ -8,6 +8,7 @@ class GameLogic{
         this.plants = [];
         this.scene = scene;
         this.lawn = lawn;
+
     }
 
     startGame(){
@@ -20,7 +21,6 @@ class GameLogic{
             let basicZombie = new BasicZombie('basic', 200, this.scene);
             this.transfer.push(basicZombie);
             this.zombiesActive.push(basicZombie);
-            
         }, 5000)
 
         
@@ -32,6 +32,21 @@ class GameLogic{
 
     returnZombie(zombie){
         this.availableZombies.push(zombie);
+    }
+
+    spawnZombies(){
+        
+            if (this.availableZombies.length > 0){
+                let temp = this.availableZombies.pop();
+                this.transfer.push(temp);
+                this.zombiesActive.push(temp)
+            } else {
+                let basicZombie = new BasicZombie('basic', 200, this.scene);
+                this.transfer.push(basicZombie);
+                this.zombiesActive.push(basicZombie);
+            }
+      
+       
     }
 
     endGame(){

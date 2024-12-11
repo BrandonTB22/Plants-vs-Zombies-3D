@@ -97,29 +97,31 @@ class Peashooter extends Plant {
         this.raycaster.set(origin, forward);
         let intersects = this.raycaster.intersectObject(tar);
 
-        if (this.availablePeas.length <  1){
+        // Generate the pea if not already
+        if (this.availablePeas.length < 1){
             const geo = new THREE.SphereGeometry(1, 10, 10);
             const material = new THREE.MeshBasicMaterial({color : 0x00ff00});
             this.pea = new THREE.Mesh(geo, material);
             this.pea.position.set(this.model.position.x + 5, this.model.position.y + 1.8, this.model.position.z);
             this.pea.visible = false;
             this.availablePeas.push(this.pea);
-          
-            
         } 
         
         if (intersects.length > 0 && zombie.getHealth() > 0){
             this.pea.visible = true;
             console.log("zombie was detected");
+
+
             
             if (zombie.getHealth() <= 0) {
                 intersects.splice(intersects[0], 1);
-                tar.position.set(0, -100, 0);
+                
                 
             }
                 
                 if (this.pea.position.x > maxPos){
-                    this.pea.visible = false;
+                    //this.pea.visible = false;
+                    this.pea.position.x = this.model.position.x;
                     setTimeout(() => {
                         
                         this.pea.position.x = this.model.position.x;
@@ -130,17 +132,19 @@ class Peashooter extends Plant {
                 } else if (intersects[0].point.x <= this.pea.position.x){
                
                         this.pea.visible = false;
-              
+                        this.pea.position.x = this.model.position.x;
                             setTimeout(() => {
-                                this.pea.position.x = this.model.position.x;
+                                
                                 this.pea.visible = false;
-                                     // Make sure the function only runs once
+                                 
+                            },coolDown);
+
+                                // Make sure the function only runs once
                                 for (let i = 0; i < 1; i++){
-                                    //zombie.reduceHealth(100);
+                                    zombie.reduceHealth(100);
                                     console.log("reduced health");
                                     console.log(zombie.getHealth());
                                 }
-                            },coolDown);
                           
 
                             return;

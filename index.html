@@ -169,6 +169,7 @@ let selectedPlant = false;
 let plantsActive = [];
 let removedPlants = [];
 let plants = [];
+let gameStarted = false;
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -355,6 +356,7 @@ const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
     startButton.style.display = 'none'; // Hide the button after it has been clicked
     game.startGame();
+    gameStarted = true;
     levelMusic.play();
     camera.position.set(30, 50, 80);
     camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
@@ -489,6 +491,7 @@ window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
 
 let elapsedTimed = 0;
+let zombiesSpawnTime = 0;
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
@@ -496,7 +499,18 @@ function animate() {
     const delta = clock.getDelta(); // Get the time delta for the frame
 
     basicZombie.updateZombiePosition();
-    
+    if (gameStarted){
+        zombiesSpawnTime += delta;
+
+        if (zombiesSpawnTime >= 10){
+            console.log(zombiesSpawnTime);
+            game.spawnZombies();
+            
+       
+            zombiesSpawnTime = 0;
+        }
+    };
+  
     for (let i = 0; i < zombies.length; i++){
 
         zombies[i].loadBasicZombie(scene).then((updateFn) => {
