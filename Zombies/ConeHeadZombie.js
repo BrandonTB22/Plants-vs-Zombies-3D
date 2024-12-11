@@ -1,0 +1,192 @@
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
+
+export function loadConeheadZombie(scene) {
+    return new Promise((resolve, reject) => {
+        const loader = new GLTFLoader();
+        
+        loader.load(
+            '/Zombies/zombie/scene.gltf', // Path to the model
+            (gltf) => {
+                const zombie = gltf.scene; // Get the 3D model
+                zombie.position.set(50, 20, 50); // Position in the center of the scene
+                zombie.scale.set(20, 20, 20); // Adjust scale if needed
+                const direction = new Vector3();
+                zombie.getWorldDirection(direction); // Get the zombie's current direction
+                direction.y = 0; // Keep the zombie facing horizontally, prevent flipping
+                direction.normalize(); // Normalize the direction vector
+                
+                // Update the zombie's rotation to face the camera
+                const rotation = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 2), direction);
+                zombie.quaternion.copy(rotation); // Apply the rotation to the zombie
+                scene.add(zombie);
+
+                // Extract nodes by their names
+                const nodes = {};
+                zombie.traverse((child) => {
+                    if (child.name) nodes[child.name] = child;
+                });
+
+                // Ensure the required nodes are found
+                const lThigh = nodes['l_thigh_025'];
+                const rThigh = nodes['r_thigh_029'];
+                const head = nodes['head_013']; // Head node for nodding
+                const lShoulder = nodes['l_shoulder_05']; // Left shoulder for swinging
+                const rShoulder = nodes['r_shoulder_016']; // Right shoulder
+                if (!lThigh || !rThigh || !head || !lShoulder || !rShoulder) {
+                    console.error('Required nodes not found in the model!');
+                    reject('Nodes not found');
+                    return;
+                }
+
+              // Load the traffic cone
+loader.load(
+    '/Zombies/traffic_cone/scene.gltf',
+    (coneGltf) => {
+        const trafficCone = coneGltf.scene; // Get the 3D model
+        trafficCone.scale.set(0.023, 0.023, 0.023); // Adjust the scale
+
+        // Compute the bounding box of the head
+        const box = new THREE.Box3().setFromObject(head);
+        const size = new THREE.Vector3();
+        const center = new THREE.Vector3();
+        box.getSize(size);  // Get size of the head
+        box.getCenter(center); // Get the center of the head
+
+        // Position the cone above the head
+        trafficCone.position.set(center.x + 0.045, center.y + size.y / 2, center.z); // Slightly above the head
+        trafficCone.rotation.set(Math.PI / 0.5, 2.9, 1.9); // Rotate 90° around the X-axis
+
+        head.add(trafficCone); // Attach the cone to the head
+    },
+    undefined,
+    (error) => {
+        console.error('An error occurred loading the traffic cone model:', error);
+    }
+);
+
+
+
+                // Set up animation
+                const mixer = new AnimationMixer(zombie);
+                const walkingClip = createWalkingAnimation(lThigh, rThigh, head, lShoulder, rShoulder);
+                const action = mixer.clipAction(walkingClip);
+                action.play();
+
+                // Add animation update function to the zombie's userData
+                zombie.userData.updateAnimation = (delta) => mixer.update(delta);
+
+                // Resolve the promise with the update function for animations
+                resolve(zombie.userData.updateAnimation);
+            },
+            undefined,
+            (error) => {
+                console.error('An error occurred loading the zombie model:', error);
+                reject(error); // Reject the promise if there's an error
+            }
+        );
+    });
+
+    function createWalkingAnimation(lThigh, rThigh, head, lShoulder, rShoulder) {
+        const times = [0, 1, 3]; // Time points for the walking cycle
+
+        // Hip rotations
+        const hipRotation = new Quaternion(-0.5000000596046448, -0.49999991059303284, -0.5, 0.5); // Existing hip rotation
+        const hipRotationDownward = new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI / 2);
+        hipRotation.multiply(hipRotationDownward);
+
+        const lThighRotations = [
+            hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 5), -Math.PI / 4)), // Rotate left leg downward
+            hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), -Math.PI / 4)), // Rotate back to neutral position
+            hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -5), Math.PI / 4)), // Reset to downward
+        ];
+        
+        const rThighRotations = [
+            hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 5), Math.PI / 4)), // Rotate right leg downward
+            hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 4)), // Rotate back to neutral position
+            hipRotation.clone().multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -5), -Math.PI / 4)), // Reset to downward
+        ];
+
+        const headRotations = [
+            new Quaternion().setFromAxisAngle(new Vector3(0, 0, 2), Math.PI / 8), // Head nods downward
+            new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 8), // Head nods downward
+            new Quaternion().setFromAxisAngle(new Vector3(0, 0, -2), -Math.PI / 8), // Head nods upward
+        ];
+        const shoulderRotationsl = [
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-2, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -0.5), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 18)), // Slight upward swing
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-2, 2, 0), Math.PI / 2) // Neutral forward position
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -0.5), Math.PI / 6)), // Lower arm by rotating downward on Y-axis
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-2, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(1, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -0.5), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -1), -Math.PI / 18)), // Slight downward swing
+        ];
+         
+
+        const shoulderRotationsr = [
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-3, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-6, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 10), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 1), Math.PI / 18)), // Slight upward swing
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-3, 2, 0), Math.PI / 2) // Neutral forward position
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-6, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 20), Math.PI / 6)), // Lower arm by rotating downward on Y-axis
+            new Quaternion()
+                .setFromAxisAngle(new Vector3(-3, 2, 0), Math.PI / 2) // Arm forward (default position)
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-6, 0, 0), Math.PI)) // Rotate 180 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(-1, 0, 0), Math.PI / 4)) // Rotate 45 degrees around X-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, 10), Math.PI / 6)) // Lower arm by rotating downward on Y-axis
+                .multiply(new Quaternion().setFromAxisAngle(new Vector3(0, 0, -1), -Math.PI / 18)), // Slight downward swing
+        ];
+        
+
+        const lThighTrack = new QuaternionKeyframeTrack(
+            `${lThigh.uuid}.quaternion`,
+            times,
+            lThighRotations.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+        const rThighTrack = new QuaternionKeyframeTrack(
+            `${rThigh.uuid}.quaternion`,
+            times,
+            rThighRotations.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+        const headTrack = new QuaternionKeyframeTrack(
+            `${head.uuid}.quaternion`,
+            times,
+            headRotations.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+        const shoulderTrackl = new QuaternionKeyframeTrack(
+            `${lShoulder.uuid}.quaternion`,
+            times,
+            shoulderRotationsl.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+        const shoulderTrackr = new QuaternionKeyframeTrack(
+            `${rShoulder.uuid}.quaternion`,
+            times,
+            shoulderRotationsr.flatMap(q => [q.x, q.y, q.z, q.w])
+        );
+
+
+        return new AnimationClip('Walking', -1, [lThighTrack, rThighTrack, headTrack, shoulderTrackl, shoulderTrackr]);
+    }
+}
+
+
