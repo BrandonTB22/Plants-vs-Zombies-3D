@@ -2,7 +2,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import {Plant} from './Plant.js';
-import { mod } from 'three/webgpu';
+
 
 // Name: peashooter; Cost: 100 sun
 class Peashooter extends Plant {
@@ -11,7 +11,6 @@ class Peashooter extends Plant {
           // Additional properties for Peashooter
         this.raycaster = new THREE.Raycaster();
         this.peagenerated = false;
-        this.intersects;
         this.count = 0;
         this.availablePeas = [];
         this.peal
@@ -54,65 +53,69 @@ class Peashooter extends Plant {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    shootPea(){
-        const speed = 0.1;
-        
+    playSoundEffect(){
+        const listener = new THREE.AudioListener();
+        const audioloader = new THREE.AudioLoader();
+        const splatSound = new THREE.Audio(listener);
+
+        audioloader.load('./SoundFiles/splat.mp3', (buffer) => {
+            splatSound.setBuffer(buffer);
+            splatSound.setLoop(false);
+            splatSound.setVolume(1);
+        });
+
+        return splatSound.play();
+    }
+
+    shootPea(target){
+        const speed = 0.3;
+        const maxPos = 74;
+        const coolDown = 2000;
+        const origin = this.model.position;
+        const forward = new THREE.Vector3(1, 0, 0);
+
+        this.raycaster.set(origin, forward);
+        let intersects = this.raycaster.intersectObject(target);
+
         if (this.availablePeas.length <  1){
-            const geo = new THREE.BoxGeometry(3, 3, 3);
-            const material = new THREE.MeshBasicMaterial({color : 0xffffff});
+            const geo = new THREE.SphereGeometry(1, 10, 10);
+            const material = new THREE.MeshBasicMaterial({color : 0x00ff00});
             this.pea = new THREE.Mesh(geo, material);
-    
+            this.pea.position.set(this.model.position.x + 5, this.model.position.y + 1.8, this.model.position.z);
+            this.pea.visible = false;
             this.availablePeas.push(this.pea);
           
             
         } else {
             
-            console.log(this.pea.position.x);
-            this.pea.position.x += 0.1;
+            if (intersects.length > 0){
+                this.pea.visible = true;
+                console.log("zombie was detected");
+                
+
+                if (this.pea.position.x > maxPos || intersects[0].point.x < this.pea.position.x){
+                    this.pea.visible = false;
+                    setTimeout(() => {
+                        this.pea.position.x = this.model.position.x;
+                        this.pea.visible = false;
+                    }, coolDown)
+
+                } else {
+                    
+                    this.pea.position.x += speed;
+                }
+            } 
+        
         }
         
+        return this.pea;
        
-        // pea.position.add(direction.clone().multiplyScalar(speed));
-
-        /*
-            if (target.position != undefined){
-                let direction = new THREE.Vector3().subVectors(target.position, this.peashooter.position).normalize();
-            
-            if (pea.position.distanceTo(target.position) < 0.5){
-                pea.visible= false;
-            } else {
-                // Move the pea
-                pea.position.add(direction.clone().multiplyScalar(speed));
-            }
-        }
-            */
-    }
-      
-    detectZombie(zombie){
-        
-        const forward = new THREE.Vector3(1.5, 0, 0);
-        
-        if (this.model != null){
-            const origin = this.model.position;
-
-            this.raycaster.set(origin, forward);
-
-            this.intersects = this.raycaster.intersectObjects(zombie);
-            
-            this.shootPea(zombie);
-        }
-    
-        if (this.intersects.length > 0){
-            console.log("zombie detected");
-
-            this.shootPea(this.intersects[0].object);
-        }
-    
       
     }
-            
+      
+}
 
-    }
+
 
     
         

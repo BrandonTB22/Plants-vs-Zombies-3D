@@ -7,7 +7,7 @@ class BasicZombie {
         this.type = type;
         this.health = health;
         this.model;
-        this.spawns = [0, 10, 15, 20, 25]
+        this.spawns = [0, 12, 17, 20, 25]
 
         this.rand = Math.floor(Math.random() * this.spawns.length)
         this.lane = this.spawns[this.rand];
@@ -20,7 +20,7 @@ getType(){
 
 updateZombiePosition(){
     if (this.model != null){
-        this.model.position.x -= 0.1;
+        this.model.position.x -= 0.05;
     }
 }
 
@@ -37,7 +37,7 @@ loadBasicZombie(scene) {
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
                 console.log(this.lane);
-                zombie.position.set(90, 5, this.lane); // Position in the center of the scene
+                zombie.position.set(90, 5, this.spawns[0]); // Position in the center of the scene
                 zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
