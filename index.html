@@ -137,6 +137,7 @@
 import THREE from './threejsModule.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import {SoundHandler} from './SoundHandler.js';
+import { SunSystem } from './SunSystem.js';
 import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
@@ -146,9 +147,10 @@ import {Repeater} from './Plants/Repeater.js'
 import {Chomper} from './Plants/Chomper.js'
 import {Potatomine} from './Plants/Potatomine.js'
 import {Walnut} from './Plants/Walnut.js'
-import Sunflower from './Plants/Sunflower.js'; 
+import {Sunflower} from './Plants/Sunflower.js'; 
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
-import { loadBasicZombie } from './Zombies/BasicZombie.js'; // Import the model file of basic zombie
+import {GameLogic} from './GameLogic.js';
+import {BasicZombie} from './Zombies/BasicZombie.js';
 import { loadConeheadZombie } from './Zombies/ConeheadZombie.js'; // Import the model file of conehead zombie
 
 
@@ -189,8 +191,7 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
-
-const sunflower = new Sunflower('Sunflower', null, 100, 50);
+var game = new GameLogic(scene, lawn);
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -200,15 +201,19 @@ const audioLoader = new THREE.AudioLoader();
 const levelMusic = new THREE.Audio(listener);
 const soundEffect1 = new THREE.Audio(listener);
 const soundEffect2 = new THREE.Audio(listener);
+const soundEffect3 = new THREE.Audio(listener);
+
+audioLoader.load('./SoundFiles/zombiesAreComing.mp3', (buffer) => {
+    soundEffect3.setBuffer(buffer);
+    soundEffect3.setLoop(false);
+    soundEffect3.setVolume(1.0);
+})
 
 audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     levelMusic.setBuffer(buffer);
     levelMusic.setLoop(true);
     levelMusic.setVolume(0.5);
 });
-
-let rep = new Repeater('repeater', 200, 100);
-rep.generatePlant(scene);
 
 function checkForPlant(name){
     removedPlants.forEach(plant => {
@@ -242,7 +247,7 @@ boxes.forEach((box, index) => {
 
                 // Check if Peashooter has been removed and add back if necessary
                 if (removedPlants.length == 0 || checkForPlant('peashooter') == false) {
-                    peashooter = new Peashooter('peashooter', null, 100, 100);
+                    peashooter = new Peashooter('peashooter', 100, 100, 'Plants/peashooter/scene.gltf', 0, 3, -2,   0, 1.5, 0,  3, 3, 3);
                     plants.push(peashooter);
                 } else {
                     plants.push(checkForPlant('peashooter'));
@@ -278,11 +283,31 @@ boxes.forEach((box, index) => {
     break;
 
         case 3:
+        // Sunflower selection logic\
+        let sunflower;
 
-        break;
+        if (plantSelected){
+            plantSelected = false;
+            raycasting = false;
+        } else {
+            plantSelected = true;
+            console.log("Sunflower Selected");
+
+            // Check if a sunflower has been removed and add it back
+
+            if (removedPlants.length == 0 || checkForPlant('sunflower') == false) {
+                sunflower = new Sunflower ('sunflower', 50, 100, 'Plants/sunflower/scene.gltf', 0, -3.3, -3,    0, 0, 0,     0.4, 0.4, 0.4);
+                plants.push(sunflower);
+            } else {
+                plants.push(checkForPlant('sunflower'));
+            }
+        }
+
+            break;
 
         case 4:
 
+        // Repeater selection logic
         let repeater;
 
         if (plantSelected){
@@ -294,7 +319,7 @@ boxes.forEach((box, index) => {
 
             // Check if repeater has been removed and add back if necessary
             if (removedPlants.length == 0 || checkForPlant('repeater') == false) {
-                repeater = new Repeater('repeater', 100, 100);
+                repeater = new Repeater('repeater', 100, 100, 'Plants/repeater/scene.gltf', 0, 0, 0,   0 ,3 ,0,    3, 3, 3);
                 plants.push(repeater);
             } else {
                 plants.push(checkForPlant('repeater'));
@@ -315,14 +340,22 @@ boxes.forEach((box, index) => {
   });
 });
 
+// Load the zombie model and get the animation update function
+var basicZombie = new BasicZombie('basic', 1000);
+const zombieUpdateFns = [];
 
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
     startButton.style.display = 'none'; // Hide the button after it has been clicked
+    game.startGame();
     levelMusic.play();
     camera.position.set(30, 50, 80);
     camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
+
+    setTimeout(() => {
+        soundEffect3.play();
+    },10000)
 });
 
 // Texture Loader
@@ -359,23 +392,27 @@ tiles.forEach(tile => {
     });
 });
 
+// Reference the sun count element in the GUI
+const sunCounterElement = document.getElementById('sunText');
+
+const lawnBounds = {
+    xMin: lawn.tiles[0][0].position.x, // First tile in the first row
+    xMax: lawn.tiles[0][lawn.tiles[0].length - 1].position.x, // Last tile in the first row
+    zMin: lawn.tiles[0][0].position.z, // First row
+    zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
+};
+
+// Instantiate the SunSystem
+const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds, camera);
+
+// Spawn suns timer
+setInterval(() => {
+    sunSystem.spawnSun();
+}, 10000); // 10 seconds
+
+
 let updateAnimation; // This will hold the animation update function
 const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
-
-// Load the zombie model and get the animation update function
-loadBasicZombie(scene).then((updateFn) => {
-    updateAnimation = updateFn; // Assign the update function when the promise resolves
-}).catch((error) => {
-    console.error("Error loading the zombie:", error);
-});
-
-let updateAnimation2; // This will hold the animation update function
-// Load the zombie model and get the animation update function
-loadConeheadZombie(scene).then((updateFn) => {
-    updateAnimation2 = updateFn; // Assign the update function when the promise resolves
-}).catch((error) => {
-    console.error("Error loading the zombie:", error);
-});
 
 // Mouse movements 
 const mouse = new THREE.Vector2();
@@ -412,20 +449,28 @@ function onClick(event) {
                     soundEffect2.play();
                 });
 
-                console.log(currPlant.generatePlant());
-                scene.add(currPlant.generatePlant());  // Add the plant to the scene
-               
+ 
+                // Add the plant to the scene
+                (async () => {
+                    try {
+                        const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
+                        scene.add(model);
+
+                        if (currPlant.getName() == 'peashooter'){
+                            let peas = currPlant.generatePeas();
+                            scene.add(peas[0]);
+                     
+                        };
+                
+                    } catch (error) {
+                        console.error("Failed to add model to the scene", error);
+                    }
+                })();
+            
 
                 // Update the sun count based on plant cost
                 // updateSunCount(currPlant.getCost());
 
-                // Fix the variable typo
-                currPlant.setPosition(clickedObj.position.x, clickedObj.position.y + 5, clickedObj.position.z);
-                
-                let peas = currPlant.generatePeas();
-                scene.add(peas[0]);
-                scene.add(peas[1]);
-                
                 lawn.occupyTile(clickedObj);
                 raycasting = false;
                 plantSelected = false;
@@ -434,6 +479,9 @@ function onClick(event) {
     }
 }
 
+// Zombies to animate
+let zombies = game.transferZombies();
+let activeZombies = [];
 
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
@@ -441,24 +489,54 @@ window.addEventListener('mousemove', OnMouseMove, false);
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
-  
-    // Handle peashooter shooting peas
+
+    const delta = clock.getDelta(); // Get the time delta for the frame
+
+    basicZombie.updateZombiePosition();
+    
+    for (let i = 0; i < zombies.length; i++){
+
+        zombies[i].loadBasicZombie(scene).then((updateFn) => {
+            zombieUpdateFns.push(updateFn);// Assign the update function when the promise resolves
+        }).catch((error) => {
+            console.error("Error loading the zombie:", error);
+        });
+
+        activeZombies.push(zombies[i]);
+        zombies.splice(zombies[i], 1);
+    }
+    
     plantsActive.forEach((plant) => {
         if (plant.getName() == 'peashooter'){
-             plant.shootPea();  
-        }
-        
-     
-    });
+            if (activeZombies.length > 0) {
+                activeZombies.forEach((zombie) => {
+                    try {
+                        plant.shootPea();
+                        // plant.detectZombie(zombie.model.getObjectByName('hitbox'));
 
+                    } catch (error){
+                        console.error("Error getting child. Trying again... ", error);
+                    }
+                    
+               
+                })
+            }
+        }
+    })
+
+    activeZombies.forEach((zombie) => {
+        zombie.updateZombiePosition();
+
+    })
     // Set tile to normal color unless raycasting
     tiles.forEach(tile => {
         tile.material.emissive.setHex(0x000000);
+        
     });
     if (raycasting){
 
         raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(tiles);
+        let intersects = raycaster.intersectObjects(tiles);
         for (let i = 0; i < intersects.length; i++){
          
             intersects[0].object.material.emissive.setHex(0x505050);
@@ -466,9 +544,11 @@ function animate() {
         
     }
 
-    const delta = clock.getDelta(); // Get the time delta for the frame
     if (updateAnimation) updateAnimation(delta); // Call the update function if available
-    if (updateAnimation2) updateAnimation2(delta); // Call the update function if available
+
+    zombieUpdateFns.forEach((updateFn) =>{
+        updateFn(delta);
+    })
 
     renderer.render(scene, camera); // Render the scene
 }

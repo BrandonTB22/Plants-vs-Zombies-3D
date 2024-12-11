@@ -1,7 +1,34 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
+import THREE from '../threejsModule';
 
-export function loadBasicZombie(scene) {
+class BasicZombie {
+    constructor(type, health){
+        this.type = type;
+        this.health = health;
+        this.model;
+        this.spawns = [0, 10, 15, 20, 25]
+
+        this.rand = Math.floor(Math.random() * this.spawns.length)
+        this.lane = this.spawns[this.rand];
+
+    }
+
+getType(){
+    return this.type;
+}
+
+updateZombiePosition(){
+    if (this.model != null){
+        this.model.position.x -= 0.1;
+    }
+}
+
+setToSpawnPosition(x, y, z){
+    this.model.position.set(x, y, z);
+}
+
+loadBasicZombie(scene) {
     return new Promise((resolve, reject) => {
         const loader = new GLTFLoader();
         
@@ -9,8 +36,9 @@ export function loadBasicZombie(scene) {
             '/Zombies/zombie/scene.gltf', // Path to the model
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
-                zombie.position.set(55, 20, 50); // Position in the center of the scene
-                zombie.scale.set(20, 20, 20); // Adjust scale if needed
+                console.log(this.lane);
+                zombie.position.set(90, 5, this.lane); // Position in the center of the scene
+                zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
                 direction.y = 0; // Keep the zombie facing horizontally, prevent flipping
@@ -19,8 +47,18 @@ export function loadBasicZombie(scene) {
                 // Update the zombie's rotation to face the camera
                 const rotation = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 2), direction);
                 zombie.quaternion.copy(rotation); // Apply the rotation to the zombie
+                
+                const geo = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+                const material = new THREE.MeshBasicMaterial({color : 0xffffff});
+                const hitBox = new THREE.Mesh(geo, material);
+                hitBox.rotation.y = 1.5;
+                
+                hitBox.name = "hitbox";
+                zombie.add(hitBox);
+                this.model = zombie;
                 scene.add(zombie);
-
+            
+                // console.log(zombie.getObjectByName('hitbox'));
                 // Extract nodes by their names
                 const nodes = {};
                 zombie.traverse((child) => {
@@ -61,6 +99,7 @@ export function loadBasicZombie(scene) {
 
     function createWalkingAnimation(lThigh, rThigh, head, lShoulder, rShoulder) {
         const times = [0, 1, 3]; // Time points for the walking cycle
+        
 
         // Hip rotations
         const hipRotation = new Quaternion(-0.5000000596046448, -0.49999991059303284, -0.5, 0.5); // Existing hip rotation
@@ -160,5 +199,8 @@ export function loadBasicZombie(scene) {
         return new AnimationClip('Walking', -1, [lThighTrack, rThighTrack, headTrack, shoulderTrackl, shoulderTrackr]);
     }
 }
+}
+
+export {BasicZombie}
 
 
