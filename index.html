@@ -401,12 +401,12 @@ const lawnBounds = {
 };
 
 // Instantiate the SunSystem
-const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds);
+const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds, camera);
 
-// Spawn suns every 15 seconds
+// Spawn suns timer
 setInterval(() => {
     sunSystem.spawnSun();
-}, 7500);
+}, 10000); // 10 seconds
 
 
 let updateAnimation; // This will hold the animation update function
@@ -489,9 +489,6 @@ function animate() {
     requestAnimationFrame(animate); // Request the next frame
 
     const delta = clock.getDelta(); // Get the time delta for the frame
-
-    // Update the SunSystem for falling suns
-    sunSystem.update(delta);
 
     basicZombie.updateZombiePosition();
     
