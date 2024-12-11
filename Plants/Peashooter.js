@@ -14,6 +14,7 @@ class Peashooter extends Plant {
         this.intersects;
         this.count = 0;
         this.availablePeas = [];
+        this.peal
 
     }
 
@@ -53,19 +54,28 @@ class Peashooter extends Plant {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    shootPea(target){
-        const speed = 1;
-        let pea;
+    shootPea(){
+        const speed = 0.1;
         
-        if (this.peagenerated == false){
-            pea = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), new THREE.MeshBasicMaterial({ color : 0x00ff00}));
-            this.availablePeas.push(pea);
-            this.peagenerated = true;
+        if (this.availablePeas.length <  1){
+            const geo = new THREE.BoxGeometry(3, 3, 3);
+            const material = new THREE.MeshBasicMaterial({color : 0xffffff});
+            this.pea = new THREE.Mesh(geo, material);
+    
+            this.availablePeas.push(this.pea);
+          
+            
         } else {
-            pea = this.availablePeas[0];
+            
+            console.log(this.pea.position.x);
+            this.pea.position.x += 0.1;
         }
+        
+       
+        // pea.position.add(direction.clone().multiplyScalar(speed));
 
-            if (target.position != null){
+        /*
+            if (target.position != undefined){
                 let direction = new THREE.Vector3().subVectors(target.position, this.peashooter.position).normalize();
             
             if (pea.position.distanceTo(target.position) < 0.5){
@@ -75,19 +85,23 @@ class Peashooter extends Plant {
                 pea.position.add(direction.clone().multiplyScalar(speed));
             }
         }
+            */
     }
       
-    detectZombie(zombies){
+    detectZombie(zombie){
         
         const forward = new THREE.Vector3(1.5, 0, 0);
+        
         if (this.model != null){
             const origin = this.model.position;
+
+            this.raycaster.set(origin, forward);
+
+            this.intersects = this.raycaster.intersectObjects(zombie);
+            
+            this.shootPea(zombie);
         }
     
-        this.raycaster.set(origin, forward);
-
-        this.intersects = this.raycaster.intersectObjects(zombies);
-        
         if (this.intersects.length > 0){
             console.log("zombie detected");
 

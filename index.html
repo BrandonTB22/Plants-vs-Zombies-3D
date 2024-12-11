@@ -512,7 +512,9 @@ function animate() {
             if (activeZombies.length > 0) {
                 activeZombies.forEach((zombie) => {
                     try {
-                        plant.detectZombie(zombie.model.getObjectByName("hitbox"));
+                        plant.shootPea();
+                        // plant.detectZombie(zombie.model.getObjectByName('hitbox'));
+
                     } catch (error){
                         console.error("Error getting child. Trying again... ", error);
                     }
