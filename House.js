@@ -18,7 +18,7 @@ class House {
         const boxGeo = new THREE.BoxGeometry(this.sizeX, this.sizeY, this.sizeZ);
 
         // Load the tiles texture for the top side
-        const topTexture = this.textureLoader.load('/tiles.png'); // Replace with correct path
+        const topTexture = this.textureLoader.load('./Textures/tiles.png'); // Replace with correct path
         topTexture.wrapS = THREE.RepeatWrapping;
         topTexture.wrapT = THREE.RepeatWrapping;
         topTexture.repeat.set(16, 12); // Set the repeat size of the texture, adjust if necessary
@@ -50,7 +50,7 @@ class House {
         const boxGeo = new THREE.BoxGeometry(this.sizeX / 1.5, this.sizeY / 0.25, this.sizeZ / 1.3);
         
         // Load the texture and apply it to the front face
-        const frontTexture = this.textureLoader.load('/House2.jpg'); // Replace with correct path
+        const frontTexture = this.textureLoader.load('./Textures/House2.jpg'); // Replace with correct path
         frontTexture.wrapS = THREE.RepeatWrapping;
         frontTexture.wrapT = THREE.RepeatWrapping;
         frontTexture.repeat.set(1, 1); // Set the repeating of the texture (adjust as necessary)

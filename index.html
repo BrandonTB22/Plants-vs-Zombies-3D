@@ -151,7 +151,8 @@ import {Sunflower} from './Plants/Sunflower.js';
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import {GameLogic} from './GameLogic.js';
 import {BasicZombie} from './Zombies/BasicZombie.js';
-import { loadConeheadZombie } from './Zombies/ConeheadZombie.js'; // Import the model file of conehead zombie
+import { loadConeheadZombie } from './Zombies/ConeheadZombie.js';
+import { Lawnmower } from './Lawnmower';
 
 
 let raycasting = false;
@@ -401,6 +402,8 @@ const lawnBounds = {
     zMin: lawn.tiles[0][0].position.z, // First row
     zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
 };
+
+
 
 // Instantiate the SunSystem
 const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds, camera);
