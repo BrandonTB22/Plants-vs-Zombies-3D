@@ -33,7 +33,7 @@
     <div id="gui">
         <div id="sunEnergy">
 
-            <h3 id="sunText">1000</h3>
+            <h3 id="sunText">50</h3>
         </div>
         <div id="plantSlots">
             <!-- Plant slots -->
@@ -247,7 +247,7 @@ boxes.forEach((box, index) => {
 
                 // Check if Peashooter has been removed and add back if necessary
                 if (removedPlants.length == 0 || checkForPlant('peashooter') == false) {
-                    peashooter = new Peashooter('peashooter', 100, 100, 'Plants/peashooter/scene.gltf', 0, 3, -2,   0, 1.5, 0,  3, 3, 3);
+                    peashooter = new Peashooter('peashooter', 100, 100, 'Plants/peashooter/scene.gltf', 0, 3, -2,   0, 1.5, 0,  4, 4, 4);
                     plants.push(peashooter);
                 } else {
                     plants.push(checkForPlant('peashooter'));
@@ -455,12 +455,6 @@ function onClick(event) {
                     try {
                         const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
                         scene.add(model);
-
-                        if (currPlant.getName() == 'peashooter'){
-                            let peas = currPlant.generatePeas();
-                            scene.add(peas[0]);
-                     
-                        };
                 
                     } catch (error) {
                         console.error("Failed to add model to the scene", error);
@@ -511,7 +505,7 @@ function animate() {
             if (activeZombies.length > 0) {
                 activeZombies.forEach((zombie) => {
                     try {
-                        plant.shootPea();
+                        scene.add(plant.shootPea(zombie.model.getObjectByName('hitbox')));
                         // plant.detectZombie(zombie.model.getObjectByName('hitbox'));
 
                     } catch (error){

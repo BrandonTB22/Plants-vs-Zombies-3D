@@ -8,6 +8,7 @@ class Plant {
         this.health = health;  // Initialize health properly
         this.modelPath = modelPath;
         this.model;
+        
 
         // Used to adjust the position on the tile
         this.Xadj = Xadj;
