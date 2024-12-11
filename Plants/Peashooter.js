@@ -17,10 +17,38 @@ class Peashooter extends Plant {
         this.zombie;
         this.health;
         this.availablePeas = [];
-        this.pea
+        this.pea;
+        this.distanceTo;
+        this.minDistance = Infinity;
+        this.closestZombie;
+        this.intersects;
+        this.delay = 0;
+
 
     }
 
+    setMinDistance(distnace){
+        this.minDistance = distnace;
+    }
+
+    getMinDistance(){
+        return this.minDistance;
+    }
+    setClosestZombie(zombie){
+        this.closestZombie = zombie;
+    }
+
+    getClosestZombie(){
+        return this.closestZombie;
+    }
+
+    setDistanceTo(distanceTo){
+        this.distanceTo = distanceTo;
+    }
+
+    getDistanceTo(){
+        return this.distanceTo;
+    }
     getCost(){
         return this.cost;
     }
@@ -76,26 +104,48 @@ class Peashooter extends Plant {
     }
 
     reduceZombieHealth(zombie){
-        console.log(zombie.getHealth());
+        
     }
 
     canShoot(){
         return Date.now() - this.lastTimeShot >= this.shootCooldown;
     }
 
-    shootPea(target){
-        let zombie = target;
+    // Detect an intersection between the raycasting an zombie
+    detectIntersection(target){
         let tar = target.model.getObjectByName('hitbox');
-        let zombieHit;
-       
-        const speed = 0.3;
-        const maxPos = 74;
-        const coolDown = 2000;
         const origin = this.model.position;
         const forward = new THREE.Vector3(1, 0, 0);
 
         this.raycaster.set(origin, forward);
-        let intersects = this.raycaster.intersectObject(tar);
+        this.intersects = this.raycaster.intersectObject(tar);
+
+        if (this.intersects.length > 0){
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    setDelay(delay){
+        this.delay = delay;
+    }
+
+    getDelay(){
+        return this.delay;
+    }
+    
+    // Shoot a pea if a zombie is detected
+    shootPea(target, scene, delay){
+        let time = Date.now();
+        let velocity = 0.3;
+        let zombie = target;
+        let tar = target.model.getObjectByName('hitbox');
+
+        const speed = 0.3;
+        const maxPos = 74;
+        const coolDown = 2000;
+        const startPos = this.model.position.x;
 
         // Generate the pea if not already
         if (this.availablePeas.length < 1){
@@ -104,64 +154,30 @@ class Peashooter extends Plant {
             this.pea = new THREE.Mesh(geo, material);
             this.pea.position.set(this.model.position.x + 5, this.model.position.y + 1.8, this.model.position.z);
             this.pea.visible = false;
+            scene.add(this.pea);
             this.availablePeas.push(this.pea);
         } 
         
-        if (intersects.length > 0 && zombie.getHealth() > 0){
-            this.pea.visible = true;
-            console.log("zombie was detected");
-
-
+        if (zombie.getHealth() <= 0){
+            return false;
+        }
+        // Make sure that the pea is visible
+        this.pea.visible = true;
             
-            if (zombie.getHealth() <= 0) {
-                intersects.splice(intersects[0], 1);
-                
-                
-            }
-                
-                if (this.pea.position.x > maxPos){
-                    //this.pea.visible = false;
-                    this.pea.position.x = this.model.position.x;
-                    setTimeout(() => {
-                        
-                        this.pea.position.x = this.model.position.x;
-                        this.pea.visible = false;
-                    }, coolDown)
-                
-                    
-                } else if (intersects[0].point.x <= this.pea.position.x){
-               
-                        this.pea.visible = false;
-                        this.pea.position.x = this.model.position.x;
-                            setTimeout(() => {
-                                
-                                this.pea.visible = false;
-                                 
-                            },coolDown);
-
-                                // Make sure the function only runs once
-                                for (let i = 0; i < 1; i++){
-                                    zombie.reduceHealth(100);
-                                    console.log("reduced health");
-                                    console.log(zombie.getHealth());
-                                }
-                          
-
-                            return;
-                }
-                else {
-                   
-                    this.pea.position.x += speed;
-                }
-            } 
+        // If the pea goes beyond the max distance, set it back to the original position
+        if (this.pea.position.x >= tar.parent.position.x){
+            this.pea.position.x = startPos;
+            zombie.reduceHealth(100);
+            console.log(zombie.getHealth());
+            return false;
+            
+        } else if (this.pea.position.x < maxPos){
+            this.pea.position.x += 0.3;
         
-        
-        
-        return this.pea;
-       
-      
+        } else if(this.pea.position.x > maxPos){
+            return false;
+        }
     }
-      
 }
 
 

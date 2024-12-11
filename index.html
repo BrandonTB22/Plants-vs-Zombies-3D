@@ -151,7 +151,7 @@ import {Sunflower} from './Plants/Sunflower.js';
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import {GameLogic} from './GameLogic.js';
 import {BasicZombie} from './Zombies/BasicZombie.js';
-import { loadConeheadZombie } from './Zombies/ConeheadZombie.js';
+import { ConeHeadZombie } from './Zombies/ConeheadZombie.js';
 import { Lawnmower } from './Lawnmower';
 
 
@@ -486,12 +486,18 @@ function onClick(event) {
 // Zombies to animate
 let zombies = game.transferZombies();
 let activeZombies = [];
+let activePeas = false;
 
 window.addEventListener('click', onClick, false);
 window.addEventListener('mousemove', OnMouseMove, false);
 
 let elapsedTimed = 0;
 let zombiesSpawnTime = 0;
+let coneheadSpawnTime = 0;
+let minDistance = Infinity;
+let closestZombie;
+let lastShotTime = 0;
+let peasToAnimate = [];
 // Animation loop
 function animate() {
     requestAnimationFrame(animate); // Request the next frame
@@ -501,19 +507,24 @@ function animate() {
     basicZombie.updateZombiePosition();
     if (gameStarted){
         zombiesSpawnTime += delta;
+        coneheadSpawnTime += delta;
 
         if (zombiesSpawnTime >= 10){
-            console.log(zombiesSpawnTime);
+          
             game.spawnZombies();
-            
-       
             zombiesSpawnTime = 0;
+        }
+
+        if (coneheadSpawnTime >= 25){
+           
+            game.spawnConeHeads();
+            coneheadSpawnTime = 0;
         }
     };
   
     for (let i = 0; i < zombies.length; i++){
 
-        zombies[i].loadBasicZombie(scene).then((updateFn) => {
+        zombies[i].loadZombie(scene).then((updateFn) => {
             zombieUpdateFns.push(updateFn);// Assign the update function when the promise resolves
         }).catch((error) => {
             console.error("Error loading the zombie:", error);
@@ -525,14 +536,43 @@ function animate() {
     
     plantsActive.forEach((plant) => {
         if (plant.getName() == 'peashooter'){
+           
             if (activeZombies.length > 0) {
-
+                let delay = plant.getDelay();
                     try {
                         for (let i = 0; i < activeZombies.length; i++){
-                            
-                            scene.add(plant.shootPea(activeZombies[i]));
-                            // plant.reduceHealth(plant.getHealth());
-                         
+                            // Shoot peas
+                          
+                            if (plant.detectIntersection(activeZombies[i]) == true && activeZombies[i].isAlive == true){
+                                console.log(activeZombies.indexOf(activeZombies[i]));
+
+                                plant.setDistanceTo(plant.model.position.distanceTo(activeZombies[i].model.position));
+
+                                if (plant.getDistanceTo() < plant.getMinDistance()){
+                                    console.log("shooting zombie");
+                                    plant.setMinDistance(plant.getDistanceTo());
+                                    plant.setClosestZombie(activeZombies[i]);
+                                    plant.setDelay(delay += delta); 
+                                   
+                                    if(plant.getDelay() >= 2){
+                                        
+                                        console.log("zombie was detected");
+                                        if (plant.shootPea(plant.getClosestZombie(), scene) != false){ 
+                                            continue;
+                                        } else {
+                                            plant.setDelay(0);
+                                            if (activeZombies[i].isAlive == false){
+                                                console.log(plant.getDelay());
+                                                plant.setMinDistance(Infinity);
+                                                activeZombies.splice(activeZombies[i], 1);
+                                            
+                                           
+                                            }
+                                        };
+                                                                              
+                                    }
+                                }
+                            }
                          }
 
                     } catch (error){
