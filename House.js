@@ -1,6 +1,7 @@
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 
-let house, base, upperHalf;
+let house, base, upperHalf, fenceGroup;
 
 class House {
     constructor(size, color, position) {
@@ -12,6 +13,7 @@ class House {
 
         this.group = new THREE.Group();
         this.textureLoader = new THREE.TextureLoader();
+        this.loader = new GLTFLoader(); // Initialize the GLTFLoader
     }
 
     generateBase() {
@@ -75,10 +77,23 @@ class House {
         this.group.add(upperHalf);
     }
 
+    // Load the fence model and add it to the scene
+    loadFence() {
+        this.loader.load('./fence/scene.gltf', (gltf) => {
+            fenceGroup = gltf.scene;
+            fenceGroup.scale.set(100, 100, 100); // Adjust scale as necessary
+            fenceGroup.position.set(this.position[1] - 1, this.position[1], this.position[2]); // Position it next to the house
+
+            this.group.add(fenceGroup); // Add the fence to the house group
+        }, undefined, (error) => {
+            console.error('Error loading fence model:', error);
+        });
+    }
+
     generateHouse() {
         this.generateBase();
         this.generateUpperHalf();
-
+        this.loadFence(); 
         return this.group;
     }
 }
