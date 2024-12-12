@@ -148,11 +148,11 @@ import {Lawn} from './Lawn.js';
 import {House} from './House.js';
 import {Plant} from './Plants/Plant.js';
 import {Peashooter} from './Plants/Peashooter.js';
-import {Snowpea} from './Plants/Snowpea.js'
-import {Repeater} from './Plants/Repeater.js'
-import {Chomper} from './Plants/Chomper.js'
-import {Potatomine} from './Plants/Potatomine.js'
-import {Walnut} from './Plants/Walnut.js'
+import {Snowpea} from './Plants/Snowpea.js';
+import {Repeater} from './Plants/Repeater.js';
+import {Chomper} from './Plants/Chomper.js';
+import {Potatomine} from './Plants/Potatomine.js';
+import {Walnut} from './Plants/Walnut.js';
 import {Sunflower} from './Plants/Sunflower.js'; 
 import {SpawnLocation} from './Zombies/SpawnLocation.js';
 import {GameLogic} from './GameLogic.js';
@@ -306,31 +306,34 @@ boxes.forEach((box, index) => {
             break;
 
             case 2:
-    // Snowpea selection logic
-    let snowpea;
-    if (plantSelected) {
-        plantSelected = false;
-        raycasting = false;
-    } else {
-        plantSelected = true;
-        console.log("Snowpea Selected");
+            if (parseInt(document.getElementById("sunText").textContent) >= 50){
+            // snowpea selection logic
+            let snowpea;
+            if (plantSelected) {
+                plantSelected = false;
+                raycasting = false;
+            } 
+            else {
 
-        // Check if Snowpea has been removed and add back if necessary
-        if (removedPlants.length == 0 || checkForPlant('Snowpea') == false) {
-            snowpea = new Snowpea('Snowpea', null, 175, 175); // Assuming 175 is the cost
-            plants.push(snowpea);
+            
+                plantSelected = true;
+                
+                console.log("snowpea Selected");
 
-            // Load Snowpea model
-            Snowpea(scene).then((loadedSnowpea) => {
-                console.log('Snowpea model loaded successfully');
-            }).catch((error) => {
-                console.error('Error loading Snowpea:', error);
-            });
-        } else {
-            plants.push(checkForPlant('Snowpea'));
+                // Check if Snowpea has been removed and add back if necessary
+                if (removedPlants.length == 0 || checkForPlant('snowpea') == false) {
+                    snowpea = new Snowpea('snowpea', 50, 100, 'Plants/snowpea/scene.gltf', 0, 3, -2,   0, 1.5, 0,  4, 4, 4);
+                    snowpea.setHealth(100);
+                    plants.push(snowpea);
+                
+                } else {
+                    plants.push(checkForPlant('snowpea'));
+                }
+                
+
+            }
         }
-    }
-    break;
+            break;
 
         case 3:
         // Sunflower selection logic
@@ -617,46 +620,41 @@ function animate() {
     }
     
     plantsActive.forEach((plant) => {
-        if (plant.getName() == 'peashooter'){
-           
-            if (activeZombies.length > 0) {
-                let delay = plant.getDelay();
-                    try {
-                        for (let i = 0; i < activeZombies.length; i++){
-                            // Shoot peas
-                          
-                            if (plant.detectIntersection(activeZombies[i]) == true && activeZombies[i].isAlive == true){
-                    
-                                plant.setDistanceTo(plant.model.position.distanceTo(activeZombies[i].model.position));
+    if (plant.getName() === 'peashooter' || plant.getName() === 'Snowpea') {
+        if (activeZombies.length > 0) {
+            let delay = plant.getDelay();
+            try {
+                activeZombies.forEach((zombie, i) => {
+                    if (plant.detectIntersection(zombie) && zombie.isAlive) {
+                        plant.setDistanceTo(plant.model.position.distanceTo(zombie.model.position));
 
-                                if (plant.getDistanceTo() < plant.getMinDistance()){
-                                    console.log("shooting zombie");
-                                    plant.setMinDistance(plant.getDistanceTo());
-                                    plant.setClosestZombie(activeZombies[i]);
-                                    plant.setDelay(delay += delta); 
-                                   
-                                    if(plant.getDelay() >= 2){
-                                        
-                                        console.log("zombie was detected");
-                                        if (plant.shootPea(plant.getClosestZombie(), scene) != false){ 
-                                            continue;
-                                        } else {
-                                            plant.setDelay(0);
-                                            if (activeZombies[i].isAlive == false){
-                                                plant.setMinDistance(Infinity);
-                                                activeZombies.splice(activeZombies[i], 1);
-                                            }
-                                        };
-                                    }
+                        if (plant.getDistanceTo() < plant.getMinDistance()) {
+                            plant.setMinDistance(plant.getDistanceTo());
+                            plant.setClosestZombie(zombie);
+                            plant.setDelay(plant.getDelay() + delta);
+
+                            if (plant.getDelay() >= 2) {
+                                console.log("Zombie detected and shooting...");
+                                if (plant.shootPea(plant.getClosestZombie(), scene)) {
+                                    plant.setDelay(0);
+                                }
+
+                                if (!zombie.isAlive) {
+                                    console.log("Zombie eliminated.");
+                                    plant.setMinDistance(Infinity);
+                                    plant.setClosestZombie(null);
+                                    activeZombies.splice(i, 1);
                                 }
                             }
-                         }
-
-                    } catch (error){
-                        console.error("Error getting child. Trying again... ", error);
+                        }
                     }
+                });
+            } catch (error) {
+                console.error("Error processing plants: ", error);
             }
         }
+    }
+
 
         if (plant.getName() == 'sunflower'){
             elapsedTimed += delta;
