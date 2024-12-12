@@ -1,5 +1,7 @@
 
+import THREE from "./threejsModule";
 import { BasicZombie } from "./Zombies/BasicZombie";
+import { ConeHeadZombie } from "./Zombies/ConeHeadZombie";
 class GameLogic{
     constructor(scene, lawn){
         this.transfer =[];
@@ -38,7 +40,7 @@ class GameLogic{
         
             if (this.availableZombies.length > 0){
                 let temp = this.availableZombies.pop();
-                this.transfer.push(temp);
+                //this.transfer.push(temp);
                 this.zombiesActive.push(temp)
             } else {
                 let basicZombie = new BasicZombie('basic', 200, this.scene);
@@ -47,6 +49,21 @@ class GameLogic{
             }
       
        
+    }
+
+
+    spawnConeHeads(){
+        let condehead = this.availableZombies.find(zombie => zombie.getType() == 'conehead');
+            
+        if (condehead == undefined){
+            let conehead = new ConeHeadZombie('conehead', 1000, this.scene);
+            this.transfer.push(conehead);
+            this.zombiesActive.push(conehead)
+        }
+
+        else {
+            
+        }
     }
 
     endGame(){

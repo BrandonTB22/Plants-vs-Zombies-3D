@@ -11,6 +11,7 @@ class BasicZombie {
         this.model;
         this.spawns = [0, 8, 16, 24, 32]
         this.scene = scene;
+        this.isAlive = true;
 
         this.rand = Math.floor(Math.random() * this.spawns.length)
         this.lane = this.spawns[this.rand];
@@ -33,7 +34,7 @@ getHealth(){
 
 updateZombiePosition(){
     if (this.model != null){
-        this.model.position.x -= 0.05;
+        this.model.position.x -= 0.03;
     }
 }
 
@@ -48,11 +49,13 @@ reduceHealth(ammount){
     if (this.health <= 0){
         
         this.scene.remove(this.model);
-        // this.model.position.set(0, 0, 0);
+        this.scene.remove(this.model.getObjectById('hitbox'));
+        this.isAlive = false;
+        this.model.position.set(0, -100, 0);
     }
 }
 
-loadBasicZombie(scene) {
+loadZombie(scene) {
     return new Promise((resolve, reject) => {
         const loader = new GLTFLoader();
         
