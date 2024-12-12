@@ -1,7 +1,6 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
 import THREE from '../threejsModule';
-import { userData } from 'three/webgpu';
 import { GameLogic } from '../GameLogic';
 
 class BasicZombie {
@@ -16,6 +15,8 @@ class BasicZombie {
         this.lane = this.spawns[this.rand];
 
     }
+
+    
 
 getType(){
     return this.type;

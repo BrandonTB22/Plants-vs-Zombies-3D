@@ -2,7 +2,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import {Plant} from './Plant.js';
-import { max } from 'three/webgpu';
+
 
 
 // Name: peashooter; Cost: 100 sun
