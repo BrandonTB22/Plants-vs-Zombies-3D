@@ -4,7 +4,6 @@ import { Vector3 } from "three/src/Three.js";
 import {Plant} from './Plant.js';
 
 
-
 // Name: peashooter; Cost: 100 sun
 class Peashooter extends Plant {
     constructor(name, health, cost, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ) {
@@ -35,9 +34,7 @@ class Peashooter extends Plant {
         return this.minDistance;
     }
     setClosestZombie(zombie){
-        if (zombie.model.position.x > this.model.position.x){
-            this.closestZombie = zombie;
-        }
+        this.closestZombie = zombie;
     }
 
     getClosestZombie(){
@@ -139,6 +136,8 @@ class Peashooter extends Plant {
     
     // Shoot a pea if a zombie is detected
     shootPea(target, scene, delay){
+        let time = Date.now();
+        let velocity = 0.3;
         let zombie = target;
         let tar = target.model.getObjectByName('hitbox');
 
