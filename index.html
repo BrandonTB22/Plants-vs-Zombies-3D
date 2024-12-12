@@ -219,10 +219,8 @@ function updateSunCount(amount){
     text.textContent = text.textContent - amount;
 }
 
-
-
 // What will handle the game
-var game = new GameLogic(scene, lawn);
+var game = new GameLogic(scene, lawn, camera);
 
 // Load the audio
 const listener = new THREE.AudioListener();
@@ -401,7 +399,7 @@ boxes.forEach((box, index) => {
 });
 
 // Load the zombie model and get the animation update function
-var basicZombie = new BasicZombie('basic', 1000);
+var basicZombie = new BasicZombie('basic', 1000, camera, scene);
 const zombieUpdateFns = [];
 
 // Handle the shovel being clicked
@@ -586,13 +584,13 @@ function animate() {
         zombiesSpawnTime += delta;
         coneheadSpawnTime += delta;
 
-        if (zombiesSpawnTime >= 20){
+        if (zombiesSpawnTime >= 30){
           
             game.spawnZombies();
             zombiesSpawnTime = 0;
         }
 
-        if (coneheadSpawnTime >= 35){
+        if (coneheadSpawnTime >= 45){
            
             game.spawnConeHeads();
             coneheadSpawnTime = 0;

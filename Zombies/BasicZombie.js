@@ -5,16 +5,29 @@ import { userData } from 'three/webgpu';
 import { GameLogic } from '../GameLogic';
 
 class BasicZombie {
-    constructor(type, health, scene){
+    constructor(type, health, camera, scene){
         this.type = type;
         this.health = 500;
         this.model;
         this.spawns = [0, 8, 16, 24, 32]
-        this.scene = scene;
         this.isAlive = true;
+        this.camera = camera
+        this.scene = scene;
 
         this.rand = Math.floor(Math.random() * this.spawns.length)
         this.lane = this.spawns[this.rand];
+
+        this.listener = new THREE.AudioListener();
+        this.camera.add(this.listener);
+
+        this.audioLoader = new THREE.AudioLoader();
+        this.soundEffect = new THREE.Audio(this.listener);
+
+        this.audioLoader.load('./SoundFiles/loseMusic.mp3', (buffer) => {
+            this.soundEffect.setBuffer(buffer);
+            this.soundEffect.setLoop(false);
+            this.soundEffect.setVolume(1.0);
+        })
 
     }
 
@@ -35,6 +48,15 @@ getHealth(){
 updateZombiePosition(){
     if (this.model != null){
         this.model.position.x -= 0.03;
+    }
+
+    if (this.model != null){
+        if (this.model.position.x < -3 && this.model.position.x > -6){
+            this.soundEffect.play();
+            console.log("you lose!");
+            
+        }
+
     }
 }
 

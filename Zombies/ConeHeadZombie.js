@@ -3,11 +3,12 @@ import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quater
 
 
 class ConeHeadZombie{
-    constructor(type, health, scene){
+    constructor(type, health, camera, scene){
         this.type = type;
         this.health = 1000;
         this.scene = scene;
-        this.isAlive = true;
+        this.camera = camera;
+        this.isAlive = true; 
 
         this.model;
         this.spawns = [0, 8, 16, 24, 32];

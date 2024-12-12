@@ -3,13 +3,14 @@ import THREE from "./threejsModule";
 import { BasicZombie } from "./Zombies/BasicZombie";
 import { ConeHeadZombie } from "./Zombies/ConeHeadZombie";
 class GameLogic{
-    constructor(scene, lawn){
+    constructor(scene, lawn, camera){
         this.transfer =[];
         this.zombiesActive = [];
         this.availableZombies = [];
         this.plants = [];
-        this.scene = scene;
+        this.scene =scene;
         this.lawn = lawn;
+        this.camera = camera;
 
     }
 
@@ -20,7 +21,7 @@ class GameLogic{
 
         // Begin with an initial zombie
         setTimeout(() => {
-            let basicZombie = new BasicZombie('basic', 200, this.scene);
+            let basicZombie = new BasicZombie('basic', 200, this.camera, this.scene);
             this.transfer.push(basicZombie);
             this.zombiesActive.push(basicZombie);
         }, 5000)
@@ -43,7 +44,7 @@ class GameLogic{
                 //this.transfer.push(temp);
                 this.zombiesActive.push(temp)
             } else {
-                let basicZombie = new BasicZombie('basic', 500, this.scene);
+                let basicZombie = new BasicZombie('basic', 500, this.camera, this.scene);
                 this.transfer.push(basicZombie);
                 this.zombiesActive.push(basicZombie);
             }
@@ -56,7 +57,7 @@ class GameLogic{
         let condehead = this.availableZombies.find(zombie => zombie.getType() == 'conehead');
             
         if (condehead == undefined){
-            let conehead = new ConeHeadZombie('conehead', 1000, this.scene);
+            let conehead = new ConeHeadZombie('conehead', 1000, this.camera, this.scene);
             this.transfer.push(conehead);
             this.zombiesActive.push(conehead)
         }
