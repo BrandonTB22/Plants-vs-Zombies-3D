@@ -53,7 +53,7 @@ export class SunSystem{
          const x = THREE.MathUtils.randFloat(this.lawnBounds.xMin, this.lawnBounds.xMax);
          const z = THREE.MathUtils.randFloat(this.lawnBounds.zMin, this.lawnBounds.zMax);
          const startY = 50; // Spawn height above the lawn
-         const endY = 7; // Lawn level
+         const endY = 6; // Lawn level
 
          sun.position.set(x, startY, z);
          sun.visible = true;

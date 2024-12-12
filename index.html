@@ -204,11 +204,12 @@ directionalLight.shadow.mapSize.height = 2048;
 directionalLight.shadow.bias = -0.005; // Adjust this for better shadow clarity
 directionalLight.shadow.camera.near = 1;
 directionalLight.shadow.camera.far = 50;
+directionalLight.shadow.camera.left = -100; // Adjust shadow boundaries to cover the scene
+directionalLight.shadow.camera.right = 100;
+directionalLight.shadow.camera.top = 100;
+directionalLight.shadow.camera.bottom = -100;
 
 scene.add(directionalLight);
-
-   
-
 
 
 // Update the sun count when planted
@@ -332,7 +333,7 @@ boxes.forEach((box, index) => {
     break;
 
         case 3:
-        // Sunflower selection logic\
+        // Sunflower selection logic
 
         if (parseInt(document.getElementById("sunText").textContent) >= 50){
 
@@ -455,8 +456,10 @@ scene.add(generateSpawn);
 // Generate the lawn
 for (let i = 0; i < lawnGeneration.length; i++){
     for (let j = 0; j < lawnGeneration[i].length; j++){
-        scene.add(lawnGeneration[i][j]);
-        tiles.push(lawnGeneration[i][j]);
+        const tile = lawnGeneration[i][j];
+        tile.receiveShadow = true; // Enable shadow receiving
+        scene.add(tile);
+        tiles.push(tile);
     }
 }
 
@@ -541,7 +544,11 @@ function onClick(event) {
                 (async () => {
                     try {
                         const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
-                        model.castShadow = true;
+                        model.traverse((node) => {
+                        if (node.isMesh) {
+                            node.castShadow = true; // Enable shadow casting
+                        }
+                    });
                         scene.add(model);
                         
                 
