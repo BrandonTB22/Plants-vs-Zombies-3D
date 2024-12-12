@@ -175,6 +175,7 @@ let plantsActive = [];
 let removedPlants = [];
 let plants = [];
 let gameStarted = false;
+let sunCount = 50;
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -231,6 +232,7 @@ audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
     levelMusic.setVolume(0.5);
 });
 
+// An object pool for the plants
 function checkForPlant(name){
     removedPlants.forEach(plant => {
         if (plant.getName() == name){
@@ -241,7 +243,6 @@ function checkForPlant(name){
     })
 }
 
-
 let plantSelected = false;
 boxes.forEach((box, index) => {
   if (plantImages[index]) {
@@ -251,16 +252,22 @@ boxes.forEach((box, index) => {
   box.addEventListener('click', () => {
     console.log(`Box ${index + 1} clicked!`);
     raycasting = true;
-
+    const text = document.getElementById('sunText');
     switch (index + 1) {
         case 1:
+
+            if (sunCount >= 100){
             // Peashooter selection logic
             let peashooter;
             if (plantSelected) {
                 plantSelected = false;
                 raycasting = false;
-            } else {
+            } 
+            else {
+
+            
                 plantSelected = true;
+                
                 console.log("Peashooter Selected");
 
                 // Check if Peashooter has been removed and add back if necessary
@@ -272,7 +279,10 @@ boxes.forEach((box, index) => {
                 } else {
                     plants.push(checkForPlant('peashooter'));
                 }
+                
+
             }
+        }
             break;
 
             case 2:
@@ -304,19 +314,25 @@ boxes.forEach((box, index) => {
 
         case 3:
         // Sunflower selection logic\
+
+        if (sunCount >= 50){
+
+        
         let sunflower;
 
         if (plantSelected){
             plantSelected = false;
             raycasting = false;
         } else {
+
+            
             plantSelected = true;
             console.log("Sunflower Selected");
 
             // Check if a sunflower has been removed and add it back
 
             if (removedPlants.length == 0 || checkForPlant('sunflower') == false) {
-                sunflower = new Sunflower ('sunflower', 50, 100, 'Plants/sunflower/scene.gltf', 0, -3.3, -3,    0, 0, 0,     0.4, 0.4, 0.4);
+                sunflower = new Sunflower ('sunflower', 100, 50, 'Plants/sunflower/scene.gltf', 0, -3.3, -3,    0, 0, 0,     0.4, 0.4, 0.4);
                 plants.push(sunflower);
                 sunflower.generateSunPool();
                 sunflower.setCounter(sunCounterElement);
@@ -325,7 +341,7 @@ boxes.forEach((box, index) => {
                 plants.push(checkForPlant('sunflower'));
             }
         }
-
+    }
             break;
 
         case 4:
@@ -473,6 +489,8 @@ function onClick(event) {
         raycaster.setFromCamera(mouse, camera);
         const intersects = raycaster.intersectObjects(tiles);
 
+        const text = document.getElementById('sunText');
+
         if (intersects.length > 0) {
             const clickedObj = intersects[0].object;
 
@@ -490,6 +508,9 @@ function onClick(event) {
             }else {
                 let currPlant = plants.pop();  // Get the selected plant
                 plantsActive.push(currPlant);
+                updateSunCount(currPlant.getCost());
+                sunCount -= currPlant.getCost();
+                console.log(sunCount);
 
                 // Play the planting sound
                 audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {

@@ -35,7 +35,10 @@ class Sunflower extends Plant {
         this.sun = sun;
         this.activeSuns.push(sun);
         
-    
+    }
+
+    getCost(){
+        return this.cost;
     }
 
     handleClick(event) {
