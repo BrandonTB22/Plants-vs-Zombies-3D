@@ -7,6 +7,7 @@ class Lawn{
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.sizeZ = sizeZ;
+        this.plantMap = new Map();
 
         this.lawnTile;
         this.material;
@@ -41,8 +42,17 @@ class Lawn{
         return this.tiles;
     }
 
-    occupyTile(tile){
+    occupyTile(tile, plant){
         this.occupiedTiles.push(tile);
+
+        this.plantMap.set(tile, plant);
+        
+    }
+
+    getPlantAtTile(tile){
+        const toDelete = this.plantMap.get(tile);
+        
+        return toDelete.model;
     }
 
     emptyTile(tile){

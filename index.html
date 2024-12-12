@@ -120,6 +120,12 @@
             justify-content: center;
             overflow: hidden;
         }
+
+     
+
+        #shovel:hover{
+            filter: grayscale(100%);
+        }
     
         #shovel img {
             width: 40px;
@@ -153,7 +159,6 @@ import {GameLogic} from './GameLogic.js';
 import {BasicZombie} from './Zombies/BasicZombie.js';
 import { ConeHeadZombie } from './Zombies/ConeheadZombie.js';
 import { Lawnmower } from './Lawnmower';
-
 
 let raycasting = false;
 
@@ -193,6 +198,8 @@ function updateSunCount(amount){
 
     text.textContent = text.textContent - amount;
 }
+
+// What will handle the game
 var game = new GameLogic(scene, lawn);
 
 // Load the audio
@@ -205,6 +212,13 @@ const soundEffect1 = new THREE.Audio(listener);
 const soundEffect2 = new THREE.Audio(listener);
 const soundEffect3 = new THREE.Audio(listener);
 
+const shovelSound = new THREE.Audio(listener);
+
+audioLoader.load( './SoundFiles/shovel.mp3', (buffer) => {
+    shovelSound.setBuffer(buffer);
+    shovelSound.setLoop(false);
+    shovelSound.setVolume(1.0);
+})
 audioLoader.load('./SoundFiles/zombiesAreComing.mp3', (buffer) => {
     soundEffect3.setBuffer(buffer);
     soundEffect3.setLoop(false);
@@ -226,6 +240,8 @@ function checkForPlant(name){
         }
     })
 }
+
+
 let plantSelected = false;
 boxes.forEach((box, index) => {
   if (plantImages[index]) {
@@ -351,6 +367,21 @@ boxes.forEach((box, index) => {
 var basicZombie = new BasicZombie('basic', 1000);
 const zombieUpdateFns = [];
 
+// Handle the shovel being clicked
+let shovelActive = false;
+const shovel = document.getElementById('shovel');
+shovel.addEventListener('click', () => {
+    if (shovelActive == false){
+        shovelActive = true;
+        raycasting = true;
+    } else {
+        shovelActive = false;
+        raycasting = false;
+    }
+    console.log("shovel selected");
+    shovelSound.play();
+})
+
 // Handle the start button being clicked
 const startButton = document.getElementById('startButton');
 startButton.addEventListener('click', () => {
@@ -445,9 +476,18 @@ function onClick(event) {
         if (intersects.length > 0) {
             const clickedObj = intersects[0].object;
 
-            if (lawn.getTileStatus(clickedObj) == true) {
+            if (lawn.getTileStatus(clickedObj) == true && shovelActive == false) {
                 console.log("Can't plant here");
-            } else {
+            } else if (shovelActive == true && lawn.getTileStatus(clickedObj) == true){
+                console.log("tile emptied");
+                lawn.emptyTile(clickedObj);
+                let temp = lawn.getPlantAtTile(clickedObj);
+                scene.remove(temp);
+                plantsActive.splice(plantsActive.indexOf(temp.parent), 1);
+                raycasting = false;
+                shovelActive = false;
+
+            }else {
                 let currPlant = plants.pop();  // Get the selected plant
                 plantsActive.push(currPlant);
 
@@ -475,7 +515,7 @@ function onClick(event) {
                 // Update the sun count based on plant cost
                 // updateSunCount(currPlant.getCost());
 
-                lawn.occupyTile(clickedObj);
+                lawn.occupyTile(clickedObj, currPlant);
                 raycasting = false;
                 plantSelected = false;
             }
