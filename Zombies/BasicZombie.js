@@ -6,10 +6,11 @@ import { GameLogic } from '../GameLogic';
 class BasicZombie {
     constructor(type, health, scene){
         this.type = type;
-        this.health = 200;
+        this.health = 500;
         this.model;
-        this.spawns = [0, 12, 17, 20, 25]
+        this.spawns = [0, 8, 16, 24, 32]
         this.scene = scene;
+        this.isAlive = true;
 
         this.rand = Math.floor(Math.random() * this.spawns.length)
         this.lane = this.spawns[this.rand];
@@ -22,13 +23,19 @@ getType(){
     return this.type;
 }
 
+eatPlant(plant){
+    if (this.model.getObjectById('hitbox').position.x < Math.abs(plant.position.x + 3)){
+        console.log("Eating plant");
+    }
+}
+
 getHealth(){
     return this.health;
 }
 
 updateZombiePosition(){
     if (this.model != null){
-        this.model.position.x -= 0.05;
+        this.model.position.x -= 0.03;
     }
 }
 
@@ -43,11 +50,13 @@ reduceHealth(ammount){
     if (this.health <= 0){
         
         this.scene.remove(this.model);
-        // this.model.position.set(0, 0, 0);
+        this.scene.remove(this.model.getObjectById('hitbox'));
+        this.isAlive = false;
+        this.model.position.set(0, -100, 0);
     }
 }
 
-loadBasicZombie(scene) {
+loadZombie(scene) {
     return new Promise((resolve, reject) => {
         const loader = new GLTFLoader();
         
@@ -56,7 +65,7 @@ loadBasicZombie(scene) {
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
                 console.log(this.lane);
-                zombie.position.set(90, 5, this.spawns[0]); // Position in the center of the scene
+                zombie.position.set(90, 5, this.lane); // Position in the center of the scene
                 zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
@@ -73,6 +82,7 @@ loadBasicZombie(scene) {
                 hitBox.rotation.y = 1.5;
                 
                 hitBox.name = "hitbox";
+                hitBox.visible = false;
                 zombie.add(hitBox);
                 
                 this.model = zombie;

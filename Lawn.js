@@ -7,6 +7,7 @@ class Lawn{
         this.sizeX = sizeX;
         this.sizeY = sizeY;
         this.sizeZ = sizeZ;
+        this.plantMap = new Map();
 
         this.lawnTile;
         this.material;
@@ -34,6 +35,7 @@ class Lawn{
            
                 this.lawnTile = new THREE.Mesh(boxGeo, this.material);
                 this.lawnTile.position.set(this.sizeX * j, 0, this.sizeX * i);
+                this.lawnTile.receiveShadow = true;
 
                 this.tiles[i].push(this.lawnTile);
             }
@@ -41,8 +43,17 @@ class Lawn{
         return this.tiles;
     }
 
-    occupyTile(tile){
+    occupyTile(tile, plant){
         this.occupiedTiles.push(tile);
+
+        this.plantMap.set(tile, plant);
+        
+    }
+
+    getPlantAtTile(tile){
+        const toDelete = this.plantMap.get(tile);
+        
+        return toDelete.model;
     }
 
     emptyTile(tile){

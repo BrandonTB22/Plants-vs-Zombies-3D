@@ -1,7 +1,60 @@
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
 
-export function loadConeheadZombie(scene) {
+
+class ConeHeadZombie{
+    constructor(type, health, scene){
+        this.type = type;
+        this.health = 1000;
+        this.scene = scene;
+        this.isAlive = true;
+
+        this.model;
+        this.spawns = [0, 8, 16, 24, 32];
+
+        this.rand = Math.floor(Math.random() * this.spawns.length)
+        this.lane = this.spawns[this.rand];
+
+    }
+
+    getType(){
+        return this.type;
+    }
+    
+    eatPlant(plant){
+        if (this.model.getObjectById('hitbox').position.x < Math.abs(plant.position.x + 3)){
+            console.log("Eating plant");
+        }
+    }
+    
+    getHealth(){
+        return this.health;
+    }
+    
+    updateZombiePosition(){
+        if (this.model != null){
+            this.model.position.x -= 0.03;
+        }
+    }
+    
+    setToSpawnPosition(x, y, z){
+        this.model.position.set(x, y, z);
+    }
+    
+    reduceHealth(ammount){
+        this.health -= ammount;
+        console.log(this.health);
+    
+        if (this.health <= 0){
+            
+            this.scene.remove(this.model);
+            // this.model.position.set(0, 0, 0);
+        }
+    }
+    
+
+
+loadZombie(scene) {
     return new Promise((resolve, reject) => {
         const loader = new GLTFLoader();
         
@@ -9,8 +62,8 @@ export function loadConeheadZombie(scene) {
             '/Zombies/zombie/scene.gltf', // Path to the model
             (gltf) => {
                 const zombie = gltf.scene; // Get the 3D model
-                zombie.position.set(50, 20, 50); // Position in the center of the scene
-                zombie.scale.set(20, 20, 20); // Adjust scale if needed
+                zombie.position.set(90, 5, this.lane); // Position in the center of the scene
+                zombie.scale.set(40, 40, 40); // Adjust scale if needed
                 const direction = new Vector3();
                 zombie.getWorldDirection(direction); // Get the zombie's current direction
                 direction.y = 0; // Keep the zombie facing horizontally, prevent flipping
@@ -19,6 +72,16 @@ export function loadConeheadZombie(scene) {
                 // Update the zombie's rotation to face the camera
                 const rotation = new Quaternion().setFromUnitVectors(new Vector3(1, 0, 2), direction);
                 zombie.quaternion.copy(rotation); // Apply the rotation to the zombie
+                const geo = new THREE.BoxGeometry(0.1, 0.5, 0.1);
+                const material = new THREE.MeshBasicMaterial({color : 0xffffff});
+                const hitBox = new THREE.Mesh(geo, material);
+                hitBox.rotation.y = 1.5;
+                
+                hitBox.name = "hitbox";
+                hitBox.visible = false;
+                zombie.add(hitBox);
+                
+                this.model = zombie;
                 scene.add(zombie);
 
                 // Extract nodes by their names
@@ -188,5 +251,6 @@ loader.load(
         return new AnimationClip('Walking', -1, [lThighTrack, rThighTrack, headTrack, shoulderTrackl, shoulderTrackr]);
     }
 }
-
+}
+export {ConeHeadZombie}
 

@@ -10,3 +10,4 @@ Walnut model: https://sketchfab.com/3d-models/wall-nut-d7effca07f4a4a92b1870239b
 Zombie model: https://sketchfab.com/3d-models/zombie-match-browncoat-zombie-625687dc182242e794cf34ee1914b9de
 Lawn Mower model: https://sketchfab.com/3d-models/lawn-mower-0833a211f0ab485188e56911c476a0fe#download
 Cone model: https://sketchfab.com/3d-models/traffic-cone-78e06b9d06ba4b64a6e0c7ecbf715045
+Fence model: https://sketchfab.com/3d-models/fence-pack-low-poly-game-ready-f2ed9f555ff64eae95b408409cbff602#download

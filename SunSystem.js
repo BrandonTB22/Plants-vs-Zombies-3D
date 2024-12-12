@@ -11,12 +11,26 @@ export class SunSystem{
         this.lawnBounds = lawnBounds; // { xMin, xMax, zMin, zMax } to define the spawning area
         this.camera = camera; // Needed for raycasting
 
+        this.listener = new THREE.AudioListener();
+        this.camera.add(this.listener);
+
+        this.audioLoader = new THREE.AudioLoader();
+        this.soundEffect = new THREE.Audio(this.listener);
+
+        this.audioLoader.load('./SoundFiles/sunPickup.mp3', (buffer) => {
+            this.soundEffect.setBuffer(buffer);
+            this.soundEffect.setLoop(false);
+            this.soundEffect.setVolume(1.0);
+        })
+
         // Create the pool of two sun spheres
         for (let i = 0; i < 2; i++) {
             const sunGeometry = new THREE.SphereGeometry(5/3, 16, 16);
             const sunMaterial = new THREE.MeshBasicMaterial({ color: 0xffcc00 });
             const sun = new THREE.Mesh(sunGeometry, sunMaterial);
             sun.visible = false; // Initially hide the suns
+            sun.castShadow = true;
+            sun.receiveShadow = true;
             this.scene.add(sun);
             this.suns.push(sun);
         }
@@ -90,11 +104,19 @@ export class SunSystem{
         const intersects = this.raycaster.intersectObjects(this.activeSuns);
 
         if (intersects.length > 0) {
+            this.soundEffect.play();
             const clickedSun = intersects[0].object;
             this.despawnSun(clickedSun); // Despawn the clicked sun
             this.updateSunEnergy(); // Add energy
+          
+            
         }
     }
+
+    getSunCount(){
+        return this.sunCount;
+    }
+
 
     updateSunEnergy() {
         // Update the GUI sun counter
