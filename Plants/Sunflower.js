@@ -46,6 +46,7 @@ class Sunflower extends Plant {
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
+
         // Perform raycasting to detect suns
         this.raycaster.setFromCamera(this.mouse, this.camera);
         const intersects = this.raycaster.intersectObjects(this.activeSuns);
@@ -54,7 +55,7 @@ class Sunflower extends Plant {
             
             const clickedSun = intersects[0].object;
             clickedSun.visible = false;
-            
+
             this.updateSunCount(this.counter);
         }
     }
@@ -62,6 +63,8 @@ class Sunflower extends Plant {
     setCounter(element){
         this.counter = element;
     }
+
+
     
     giveSun(){
        

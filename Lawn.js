@@ -35,6 +35,7 @@ class Lawn{
            
                 this.lawnTile = new THREE.Mesh(boxGeo, this.material);
                 this.lawnTile.position.set(this.sizeX * j, 0, this.sizeX * i);
+                this.lawnTile.receiveShadow = true;
 
                 this.tiles[i].push(this.lawnTile);
             }

@@ -165,7 +165,7 @@ let raycasting = false;
 const raycaster = new THREE.Raycaster();
 const plantImages = [
     './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
-    './Textures/Snowpea_Seed_Packet.jpg',    // Snowpea 
+    './Textures/Snow_Pea_Seed_Packet.jpg',    // Snowpea 
     './Textures/sunflowerSeedPacket.jpg',
     './Textures/Repeater_Seed_Packet.jpg' // Sunflower 
 ];
@@ -175,7 +175,7 @@ let plantsActive = [];
 let removedPlants = [];
 let plants = [];
 let gameStarted = false;
-let sunCount = 50;
+
 
 // Set up the camera, scene, and renderer
 var scene = new THREE.Scene();
@@ -189,16 +189,37 @@ var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
 renderer.setClearColor(0x000000);
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+document.body.appendChild( renderer.domElement );
 
-var light = new THREE.AmbientLight(0xffffff);
-scene.add(light);
+// Lighting
+var ambientLight = new THREE.AmbientLight(0xffffff);
+scene.add(ambientLight);
+
+var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(0, 50, 0);
+directionalLight.castShadow = true;
+directionalLight.shadow.mapSize.width = 2048; // Higher resolution for shadows
+directionalLight.shadow.mapSize.height = 2048;
+directionalLight.shadow.bias = -0.005; // Adjust this for better shadow clarity
+directionalLight.shadow.camera.near = 1;
+directionalLight.shadow.camera.far = 50;
+
+scene.add(directionalLight);
+
+   
+
+
 
 // Update the sun count when planted
 function updateSunCount(amount){
     const text = document.getElementById('sunText');
 
+ 
     text.textContent = text.textContent - amount;
 }
+
+
 
 // What will handle the game
 var game = new GameLogic(scene, lawn);
@@ -256,7 +277,7 @@ boxes.forEach((box, index) => {
     switch (index + 1) {
         case 1:
 
-            if (sunCount >= 100){
+            if (parseInt(document.getElementById("sunText").textContent) >= 100){
             // Peashooter selection logic
             let peashooter;
             if (plantSelected) {
@@ -315,7 +336,7 @@ boxes.forEach((box, index) => {
         case 3:
         // Sunflower selection logic\
 
-        if (sunCount >= 50){
+        if (parseInt(document.getElementById("sunText").textContent) >= 50){
 
         
         let sunflower;
@@ -457,8 +478,6 @@ const lawnBounds = {
     zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
 };
 
-
-
 // Instantiate the SunSystem
 const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds, camera);
 
@@ -509,8 +528,7 @@ function onClick(event) {
                 let currPlant = plants.pop();  // Get the selected plant
                 plantsActive.push(currPlant);
                 updateSunCount(currPlant.getCost());
-                sunCount -= currPlant.getCost();
-                console.log(sunCount);
+                
 
                 // Play the planting sound
                 audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {
@@ -525,17 +543,15 @@ function onClick(event) {
                 (async () => {
                     try {
                         const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
+                        model.castShadow = true;
                         scene.add(model);
+                        
                 
                     } catch (error) {
                         console.error("Failed to add model to the scene", error);
                     }
                 })();
             
-
-                // Update the sun count based on plant cost
-                // updateSunCount(currPlant.getCost());
-
                 lawn.occupyTile(clickedObj, currPlant);
                 raycasting = false;
                 plantSelected = false;
@@ -570,13 +586,13 @@ function animate() {
         zombiesSpawnTime += delta;
         coneheadSpawnTime += delta;
 
-        if (zombiesSpawnTime >= 10){
+        if (zombiesSpawnTime >= 20){
           
             game.spawnZombies();
             zombiesSpawnTime = 0;
         }
 
-        if (coneheadSpawnTime >= 25){
+        if (coneheadSpawnTime >= 35){
            
             game.spawnConeHeads();
             coneheadSpawnTime = 0;
