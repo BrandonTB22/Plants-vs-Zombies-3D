@@ -143,7 +143,7 @@ class Peashooter extends Plant {
         let tar = target.model.getObjectByName('hitbox');
 
         const speed = 0.3;
-        const maxPos = 74;
+        const maxPos = 90;
         const coolDown = 2000;
         const startPos = this.model.position.x;
 

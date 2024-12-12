@@ -74,7 +74,7 @@ reduceHealth(ammount){
         this.scene.remove(this.model);
         this.scene.remove(this.model.getObjectById('hitbox'));
         this.isAlive = false;
-        this.model.position.set(0, -100, 0);
+        this.model.position.set(1000, -100, 0);
     }
 }
 
