@@ -43,7 +43,7 @@ class GameLogic{
                 //this.transfer.push(temp);
                 this.zombiesActive.push(temp)
             } else {
-                let basicZombie = new BasicZombie('basic', 200, this.scene);
+                let basicZombie = new BasicZombie('basic', 500, this.scene);
                 this.transfer.push(basicZombie);
                 this.zombiesActive.push(basicZombie);
             }
@@ -60,14 +60,6 @@ class GameLogic{
             this.transfer.push(conehead);
             this.zombiesActive.push(conehead)
         }
-
-        else {
-            
-        }
-    }
-
-    endGame(){
-
     }
 
 }

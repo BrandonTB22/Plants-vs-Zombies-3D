@@ -544,8 +544,7 @@ function animate() {
                             // Shoot peas
                           
                             if (plant.detectIntersection(activeZombies[i]) == true && activeZombies[i].isAlive == true){
-                                console.log(activeZombies.indexOf(activeZombies[i]));
-
+                    
                                 plant.setDistanceTo(plant.model.position.distanceTo(activeZombies[i].model.position));
 
                                 if (plant.getDistanceTo() < plant.getMinDistance()){
@@ -562,14 +561,10 @@ function animate() {
                                         } else {
                                             plant.setDelay(0);
                                             if (activeZombies[i].isAlive == false){
-                                                console.log(plant.getDelay());
                                                 plant.setMinDistance(Infinity);
                                                 activeZombies.splice(activeZombies[i], 1);
-                                            
-                                           
                                             }
                                         };
-                                                                              
                                     }
                                 }
                             }
