@@ -34,7 +34,7 @@ class ConeHeadZombie{
     
     updateZombiePosition(){
         if (this.model != null){
-            this.model.position.x -= 0.03;
+            this.model.position.x -= 0.027;
         }
     }
     
