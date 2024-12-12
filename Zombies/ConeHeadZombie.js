@@ -49,7 +49,7 @@ class ConeHeadZombie{
         if (this.health <= 0){
             
             this.scene.remove(this.model);
-            // this.model.position.set(0, 0, 0);
+            this.model.position.set(1000, -100, 0);
         }
     }
     
