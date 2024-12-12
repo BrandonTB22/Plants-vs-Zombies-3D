@@ -11,3 +11,9 @@ Zombie model: https://sketchfab.com/3d-models/zombie-match-browncoat-zombie-6256
 Lawn Mower model: https://sketchfab.com/3d-models/lawn-mower-0833a211f0ab485188e56911c476a0fe#download
 Cone model: https://sketchfab.com/3d-models/traffic-cone-78e06b9d06ba4b64a6e0c7ecbf715045
 Fence model: https://sketchfab.com/3d-models/fence-pack-low-poly-game-ready-f2ed9f555ff64eae95b408409cbff602#download
+
+Slides presentation:
+https://docs.google.com/presentation/d/1r2ti4NHBe18XVtwQ8awk__hpwK4x0oWcUiimI6Oos7o/edit?usp=sharing
+
+User manual:
+https://docs.google.com/document/d/16cbii5-R_9zlNigb48jkCrRE2PJoasQ0xMoxmzzlJn4/edit?usp=sharing
