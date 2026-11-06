@@ -1,710 +1,667 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Plants Vs Zombies</title>
-    <style>
-        body{
-            margin: 0;
-            overflow: hidden;
-        }
-        #startButton {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            padding: 20px 40px;
-            font-size: 24px;
-            background-color: #000;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        #startButton:hover {
-            background-color: #444;
-        }
-        
-    </style>
-</head>
-<body>
-
+    <link rel="stylesheet" href="./styles/main.css" />
+  </head>
+  <body>
     <div id="gui">
-        <div id="sunEnergy">
-
-            <h3 id="sunText">50</h3>
-        </div>
-        <div id="plantSlots">
-            <!-- Plant slots -->
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-            <div class="plantBox"></div>
-        </div>
-        <div id="shovel">
-            <img src="Shovel.jpg" alt="Shovel" />
-        </div>
+      <div id="sunEnergy">
+        <h3 id="sunText">50</h3>
+      </div>
+      <div id="plantSlots">
+        <!-- Plant slots -->
+        <div class="plantBox"></div>
+        <div class="plantBox"></div>
+        <div class="plantBox"></div>
+        <div class="plantBox"></div>
+      </div>
+      <div id="shovel">
+        <img src="./assets/Shovel.jpg" alt="Shovel" />
+      </div>
     </div>
-    <style>
-        /* GUI Container */
-        #gui {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            display: flex;
-            align-items: center;
-            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black */
-            border: 2px solid #555;
-            border-radius: 10px;
-            padding: 10px;
-            width: 550px; /* Adjust as needed */
-            height: 60px;
-            
-        }
-    
-        /* Sun Energy Circle */
-        #sunEnergy {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ffcc00; /* Sun yellow */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: Arial, sans-serif;
-            font-size: 16px;
-            font-weight: bold;
-            color: #fff;
-            margin-right: 10px;
-            box-shadow: 0px 0px 10px 2px #ffcc00;
-        }
-    
-        #sunText {
-            user-select: none; /* Prevent text selection */
-        }
-    
-        /* Plant Seed Boxes */
-        #plantSlots {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr); /* 8 equally spaced columns */
-            gap: 5px;
-            margin-right: 10px;
-        }
-
-        .plantBox {
-            width: 40px;
-            height: 28px;
-            background-color: #228B22; /* Green for empty slot */
-            background-size: contain;
-            border: 2px solid #fff;
-            border-radius: 5px;
-        }
-
-        .plantBox:hover{
-            filter: grayscale(100%);
-        }
-    
-        /* Shovel Icon */
-        #shovel {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #888; /* Neutral color for shovel */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-     
-
-        #shovel:hover{
-            filter: grayscale(100%);
-        }
-    
-        #shovel img {
-            width: 40px;
-            height: 40px;
-        }
-    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-    <button id="startButton">Begin Game</button>
-    
+
+    <div id="menu_screen">
+      <img id="logo" src="./assets/pvz_logo.png" alt="logo" />
+      <button id="startButton">Let's Rock!</button>
+    </div>
+
     <canvas id="myCanvas"></canvas>
 
     <script type="module">
-// Include all of the imports needed
-import THREE from './threejsModule.js';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import {SoundHandler} from './SoundHandler.js';
-import { SunSystem } from './SunSystem.js';
-import {Lawn} from './Lawn.js';
-import {House} from './House.js';
-import {Plant} from './Plants/Plant.js';
-import {Peashooter} from './Plants/Peashooter.js';
-import {Snowpea} from './Plants/Snowpea.js';
-import {Repeater} from './Plants/Repeater.js';
-import {Chomper} from './Plants/Chomper.js';
-import {Potatomine} from './Plants/Potatomine.js';
-import {Walnut} from './Plants/Walnut.js';
-import {Sunflower} from './Plants/Sunflower.js'; 
-import {SpawnLocation} from './Zombies/SpawnLocation.js';
-import {GameLogic} from './GameLogic.js';
-import {BasicZombie} from './Zombies/BasicZombie.js';
-import { ConeHeadZombie } from './Zombies/ConeheadZombie.js';
-import { Lawnmower } from './Lawnmower';
+      // Include all of the imports needed
+      import THREE from "./threejsModule.js";
+      import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+      import { SoundHandler } from "./SoundHandler.js";
+      import { SunSystem } from "./SunSystem.js";
+      import { Lawn } from "./Lawn.js";
+      import { House } from "./House.js";
+      import { Plant } from "./Plants/Plant.js";
+      import { Peashooter } from "./Plants/Peashooter.js";
+      import { Snowpea } from "./Plants/Snowpea.js";
+      import { Repeater } from "./Plants/Repeater.js";
+      import { Chomper } from "./Plants/Chomper.js";
+      import { Potatomine } from "./Plants/Potatomine.js";
+      import { Walnut } from "./Plants/Walnut.js";
+      import { Sunflower } from "./Plants/Sunflower.js";
+      import { SpawnLocation } from "./Zombies/SpawnLocation.js";
+      import { GameLogic } from "./GameLogic.js";
+      import { BasicZombie } from "./Zombies/BasicZombie.js";
+      import { ConeHeadZombie } from "./Zombies/ConeheadZombie.js";
+      import { Lawnmower } from "./Lawnmower";
 
-let raycasting = false;
+      let raycasting = false;
 
-const raycaster = new THREE.Raycaster();
-const plantImages = [
-    './Textures/Peashooter_Seed_Packet.jpg', // Peashooter
-    './Textures/Snow_Pea_Seed_Packet.jpg',    // Snowpea 
-    './Textures/sunflowerSeedPacket.jpg',
-    './Textures/Repeater_Seed_Packet.jpg' // Sunflower 
-];
-const boxes = document.querySelectorAll('.plantBox');
-let selectedPlant = false;
-let plantsActive = [];
-let removedPlants = [];
-let plants = [];
-let gameStarted = false;
+      const raycaster = new THREE.Raycaster();
+      const plantImages = [
+        "./Textures/Peashooter_Seed_Packet.jpg", // Peashooter
+        "./Textures/Snow_Pea_Seed_Packet.jpg", // Snowpea
+        "./Textures/sunflowerSeedPacket.jpg",
+        "./Textures/Repeater_Seed_Packet.jpg", // Sunflower
+      ];
+      const boxes = document.querySelectorAll(".plantBox");
+      let selectedPlant = false;
+      let plantsActive = [];
+      let removedPlants = [];
+      let plants = [];
+      let gameStarted = false;
 
+      // Set up the camera, scene, and renderer
+      var scene = new THREE.Scene();
 
-// Set up the camera, scene, and renderer
-var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(
+        35,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        3000,
+      );
+      camera.position.set(30, 30, -15);
+      camera.lookAt(new THREE.Vector3(30, -10, 15));
+      scene.add(camera);
 
-var camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, .1, 3000 );
-camera.position.set(30, 30, -15);
-camera.lookAt( new THREE.Vector3(30, -10, 15));
-scene.add( camera );
+      var renderer = new THREE.WebGLRenderer({
+        canvas: myCanvas,
+        antialias: true,
+      });
+      renderer.setClearColor(0x000000);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.shadowMap.enabled = true;
+      document.body.appendChild(renderer.domElement);
 
-var renderer = new THREE.WebGLRenderer({canvas: myCanvas, antialias: true});
-renderer.setClearColor(0x000000);
-renderer.setPixelRatio(window.devicePixelRatio);
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-document.body.appendChild( renderer.domElement );
+      // Lighting
+      var ambientLight = new THREE.AmbientLight(0xffffff);
+      scene.add(ambientLight);
 
-// Lighting
-var ambientLight = new THREE.AmbientLight(0xffffff);
-scene.add(ambientLight);
+      var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+      directionalLight.position.set(0, 50, 0);
+      directionalLight.castShadow = true;
+      directionalLight.shadow.mapSize.width = 2048; // Higher resolution for shadows
+      directionalLight.shadow.mapSize.height = 2048;
+      directionalLight.shadow.bias = -0.005; // Adjust this for better shadow clarity
+      directionalLight.shadow.camera.near = 1;
+      directionalLight.shadow.camera.far = 50;
+      directionalLight.shadow.camera.left = -100; // Adjust shadow boundaries to cover the scene
+      directionalLight.shadow.camera.right = 100;
+      directionalLight.shadow.camera.top = 100;
+      directionalLight.shadow.camera.bottom = -100;
 
-var directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-directionalLight.position.set(0, 50, 0);
-directionalLight.castShadow = true;
-directionalLight.shadow.mapSize.width = 2048; // Higher resolution for shadows
-directionalLight.shadow.mapSize.height = 2048;
-directionalLight.shadow.bias = -0.005; // Adjust this for better shadow clarity
-directionalLight.shadow.camera.near = 1;
-directionalLight.shadow.camera.far = 50;
-directionalLight.shadow.camera.left = -100; // Adjust shadow boundaries to cover the scene
-directionalLight.shadow.camera.right = 100;
-directionalLight.shadow.camera.top = 100;
-directionalLight.shadow.camera.bottom = -100;
+      scene.add(directionalLight);
 
-scene.add(directionalLight);
+      // Update the sun count when planted
+      function updateSunCount(amount) {
+        const text = document.getElementById("sunText");
 
+        text.textContent = text.textContent - amount;
+      }
 
-// Update the sun count when planted
-function updateSunCount(amount){
-    const text = document.getElementById('sunText');
+      // What will handle the game
+      var game = new GameLogic(scene, lawn, camera);
 
- 
-    text.textContent = text.textContent - amount;
-}
+      // Load the audio
+      const listener = new THREE.AudioListener();
+      camera.add(listener);
 
-// What will handle the game
-var game = new GameLogic(scene, lawn, camera);
+      const audioLoader = new THREE.AudioLoader();
+      const levelMusic = new THREE.Audio(listener);
+      const soundEffect1 = new THREE.Audio(listener);
+      const soundEffect2 = new THREE.Audio(listener);
+      const soundEffect3 = new THREE.Audio(listener);
 
-// Load the audio
-const listener = new THREE.AudioListener();
-camera.add(listener);
+      const shovelSound = new THREE.Audio(listener);
 
-const audioLoader = new THREE.AudioLoader();
-const levelMusic = new THREE.Audio(listener);
-const soundEffect1 = new THREE.Audio(listener);
-const soundEffect2 = new THREE.Audio(listener);
-const soundEffect3 = new THREE.Audio(listener);
+      audioLoader.load("./SoundFiles/shovel.mp3", (buffer) => {
+        shovelSound.setBuffer(buffer);
+        shovelSound.setLoop(false);
+        shovelSound.setVolume(1.0);
+      });
+      audioLoader.load("./SoundFiles/zombiesAreComing.mp3", (buffer) => {
+        soundEffect3.setBuffer(buffer);
+        soundEffect3.setLoop(false);
+        soundEffect3.setVolume(1.0);
+      });
 
-const shovelSound = new THREE.Audio(listener);
+      audioLoader.load("./SoundFiles/ModernDay(First Wave).mp3", (buffer) => {
+        levelMusic.setBuffer(buffer);
+        levelMusic.setLoop(true);
+        levelMusic.setVolume(0.5);
+      });
 
-audioLoader.load( './SoundFiles/shovel.mp3', (buffer) => {
-    shovelSound.setBuffer(buffer);
-    shovelSound.setLoop(false);
-    shovelSound.setVolume(1.0);
-})
-audioLoader.load('./SoundFiles/zombiesAreComing.mp3', (buffer) => {
-    soundEffect3.setBuffer(buffer);
-    soundEffect3.setLoop(false);
-    soundEffect3.setVolume(1.0);
-})
-
-audioLoader.load('./SoundFiles/ModernDay(First Wave).mp3', (buffer) => {
-    levelMusic.setBuffer(buffer);
-    levelMusic.setLoop(true);
-    levelMusic.setVolume(0.5);
-});
-
-// An object pool for the plants
-function checkForPlant(name){
-    removedPlants.forEach(plant => {
-        if (plant.getName() == name){
+      // An object pool for the plants
+      function checkForPlant(name) {
+        removedPlants.forEach((plant) => {
+          if (plant.getName() == name) {
             return plant;
-        } else {
+          } else {
             return false;
+          }
+        });
+      }
+
+      let plantSelected = false;
+      boxes.forEach((box, index) => {
+        if (plantImages[index]) {
+          box.style.backgroundImage = `url(${plantImages[index]})`;
         }
-    })
-}
 
-let plantSelected = false;
-boxes.forEach((box, index) => {
-  if (plantImages[index]) {
-    box.style.backgroundImage = `url(${plantImages[index]})`;
-  }
+        box.addEventListener("click", () => {
+          console.log(`Box ${index + 1} clicked!`);
+          raycasting = true;
+          const text = document.getElementById("sunText");
+          switch (index + 1) {
+            case 1:
+              if (
+                parseInt(document.getElementById("sunText").textContent) >= 100
+              ) {
+                // Peashooter selection logic
+                let peashooter;
+                if (plantSelected) {
+                  plantSelected = false;
+                  raycasting = false;
+                } else {
+                  plantSelected = true;
 
-  box.addEventListener('click', () => {
-    console.log(`Box ${index + 1} clicked!`);
-    raycasting = true;
-    const text = document.getElementById('sunText');
-    switch (index + 1) {
-        case 1:
+                  console.log("Peashooter Selected");
 
-            if (parseInt(document.getElementById("sunText").textContent) >= 100){
-            // Peashooter selection logic
-            let peashooter;
-            if (plantSelected) {
-                plantSelected = false;
-                raycasting = false;
-            } 
-            else {
-
-            
-                plantSelected = true;
-                
-                console.log("Peashooter Selected");
-
-                // Check if Peashooter has been removed and add back if necessary
-                if (removedPlants.length == 0 || checkForPlant('peashooter') == false) {
-                    peashooter = new Peashooter('peashooter', 100, 100, 'Plants/peashooter/scene.gltf', 0, 3, -2,   0, 1.5, 0,  4, 4, 4);
+                  // Check if Peashooter has been removed and add back if necessary
+                  if (
+                    removedPlants.length == 0 ||
+                    checkForPlant("peashooter") == false
+                  ) {
+                    peashooter = new Peashooter(
+                      "peashooter",
+                      100,
+                      100,
+                      "Plants/peashooter/scene.gltf",
+                      0,
+                      3,
+                      -2,
+                      0,
+                      1.5,
+                      0,
+                      4,
+                      4,
+                      4,
+                    );
                     peashooter.setHealth(100);
                     plants.push(peashooter);
-                
-                } else {
-                    plants.push(checkForPlant('peashooter'));
+                  } else {
+                    plants.push(checkForPlant("peashooter"));
+                  }
                 }
-                
-
-            }
-        }
-            break;
+              }
+              break;
 
             case 2:
-            if (parseInt(document.getElementById("sunText").textContent) >= 50){
-            // snowpea selection logic
-            let snowpea;
-            if (plantSelected) {
-                plantSelected = false;
-                raycasting = false;
-            } 
-            else {
+              if (
+                parseInt(document.getElementById("sunText").textContent) >= 50
+              ) {
+                // snowpea selection logic
+                let snowpea;
+                if (plantSelected) {
+                  plantSelected = false;
+                  raycasting = false;
+                } else {
+                  plantSelected = true;
 
-            
-                plantSelected = true;
-                
-                console.log("snowpea Selected");
+                  console.log("snowpea Selected");
 
-                // Check if Snowpea has been removed and add back if necessary
-                if (removedPlants.length == 0 || checkForPlant('snowpea') == false) {
-                    snowpea = new Snowpea('snowpea', 175, 100, 'Plants/snowpea/scene.gltf', 0, 3, -2,   0, 1.5, 0,  4, 4, 4);
+                  // Check if Snowpea has been removed and add back if necessary
+                  if (
+                    removedPlants.length == 0 ||
+                    checkForPlant("snowpea") == false
+                  ) {
+                    snowpea = new Snowpea(
+                      "snowpea",
+                      175,
+                      100,
+                      "Plants/snowpea/scene.gltf",
+                      0,
+                      3,
+                      -2,
+                      0,
+                      1.5,
+                      0,
+                      4,
+                      4,
+                      4,
+                    );
                     snowpea.setHealth(100);
                     plants.push(snowpea);
-                
-                } else {
-                    plants.push(checkForPlant('snowpea'));
+                  } else {
+                    plants.push(checkForPlant("snowpea"));
+                  }
                 }
-                
+              }
+              break;
 
-            }
-        }
-            break;
+            case 3:
+              // Sunflower selection logic
 
-        case 3:
-        // Sunflower selection logic
+              if (
+                parseInt(document.getElementById("sunText").textContent) >= 50
+              ) {
+                let sunflower;
 
-        if (parseInt(document.getElementById("sunText").textContent) >= 50){
+                if (plantSelected) {
+                  plantSelected = false;
+                  raycasting = false;
+                } else {
+                  plantSelected = true;
+                  console.log("Sunflower Selected");
 
-        
-        let sunflower;
+                  // Check if a sunflower has been removed and add it back
 
-        if (plantSelected){
-            plantSelected = false;
-            raycasting = false;
+                  if (
+                    removedPlants.length == 0 ||
+                    checkForPlant("sunflower") == false
+                  ) {
+                    sunflower = new Sunflower(
+                      "sunflower",
+                      100,
+                      50,
+                      "Plants/sunflower/scene.gltf",
+                      0,
+                      -3.3,
+                      -3,
+                      0,
+                      0,
+                      0,
+                      0.4,
+                      0.4,
+                      0.4,
+                    );
+                    plants.push(sunflower);
+                    sunflower.generateSunPool();
+                    sunflower.setCounter(sunCounterElement);
+                    sunflower.setCamera(camera);
+                  } else {
+                    plants.push(checkForPlant("sunflower"));
+                  }
+                }
+              }
+              break;
+
+            case 4:
+              // Repeater selection logic
+              let repeater;
+
+              if (plantSelected) {
+                plantSelected = false;
+                raycasting = false;
+              } else {
+                plantSelected = true;
+                console.log("Repeater Selected");
+
+                // Check if repeater has been removed and add back if necessary
+                if (
+                  removedPlants.length == 0 ||
+                  checkForPlant("repeater") == false
+                ) {
+                  repeater = new Repeater(
+                    "repeater",
+                    100,
+                    100,
+                    "Plants/repeater/scene.gltf",
+                    0,
+                    0,
+                    0,
+                    0,
+                    3,
+                    0,
+                    3,
+                    3,
+                    3,
+                  );
+                  plants.push(repeater);
+                } else {
+                  plants.push(checkForPlant("repeater"));
+                }
+              }
+
+            default:
+              break;
+          }
+
+          // Play the seed selection sound
+          audioLoader.load("./SoundFiles/seedSelect.mp3", (buffer) => {
+            soundEffect1.setBuffer(buffer);
+            soundEffect1.setLoop(false);
+            soundEffect1.setVolume(1);
+            soundEffect1.play();
+          });
+        });
+      });
+
+      // Load the zombie model and get the animation update function
+      var basicZombie = new BasicZombie("basic", 1000, camera, scene);
+      const zombieUpdateFns = [];
+
+      // Handle the shovel being clicked
+      let shovelActive = false;
+      const shovel = document.getElementById("shovel");
+      shovel.addEventListener("click", () => {
+        if (shovelActive == false) {
+          shovelActive = true;
+          raycasting = true;
         } else {
-
-            
-            plantSelected = true;
-            console.log("Sunflower Selected");
-
-            // Check if a sunflower has been removed and add it back
-
-            if (removedPlants.length == 0 || checkForPlant('sunflower') == false) {
-                sunflower = new Sunflower ('sunflower', 100, 50, 'Plants/sunflower/scene.gltf', 0, -3.3, -3,    0, 0, 0,     0.4, 0.4, 0.4);
-                plants.push(sunflower);
-                sunflower.generateSunPool();
-                sunflower.setCounter(sunCounterElement);
-                sunflower.setCamera(camera);
-            } else {
-                plants.push(checkForPlant('sunflower'));
-            }
+          shovelActive = false;
+          raycasting = false;
         }
-    }
-            break;
+        console.log("shovel selected");
+        shovelSound.play();
+      });
 
-        case 4:
+      // Handle the start button being clicked
+      const menu = document.getElementById("menu_screen");
 
-        // Repeater selection logic
-        let repeater;
+      startButton.addEventListener("click", () => {
+        menu.remove();
+        game.startGame();
+        gameStarted = true;
+        levelMusic.play();
+        camera.position.set(30, 50, 80);
+        camera.lookAt(new THREE.Vector3(camera.position.x, 0.0, 0.0));
 
-        if (plantSelected){
-            plantSelected = false;
-            raycasting = false;
-        } else {
-            plantSelected = true;
-            console.log("Repeater Selected");
+        setTimeout(() => {
+          soundEffect3.play();
+        }, 10000);
+      });
 
-            // Check if repeater has been removed and add back if necessary
-            if (removedPlants.length == 0 || checkForPlant('repeater') == false) {
-                repeater = new Repeater('repeater', 100, 100, 'Plants/repeater/scene.gltf', 0, 0, 0,   0 ,3 ,0,    3, 3, 3);
-                plants.push(repeater);
-            } else {
-                plants.push(checkForPlant('repeater'));
-            }
+      // Texture Loader
+      var texLoader = new THREE.TextureLoader();
+      var grass1 = texLoader.load("Textures/grass1.jpg");
+      var grass2 = texLoader.load("Textures/grass2.jpg");
+
+      // Add the lawn to the scene
+      var tiles = [];
+      var lawn = new Lawn(grass1, grass2, 8, 8, 8);
+      var lawnGeneration = lawn.generateLawn();
+
+      // Add the house to the scene
+      var house = new House([64, 8, 64], 0xdbd6c8, [-36, 0, 16]);
+      var houseGeneration = house.generateHouse();
+      scene.add(houseGeneration);
+
+      // Add the zombie spawn location to the scene
+      var spawn = new SpawnLocation();
+      var generateSpawn = spawn.generateSpawnLocation();
+      scene.add(generateSpawn);
+
+      // Generate the lawn
+      for (let i = 0; i < lawnGeneration.length; i++) {
+        for (let j = 0; j < lawnGeneration[i].length; j++) {
+          const tile = lawnGeneration[i][j];
+          tile.receiveShadow = true; // Enable shadow receiving
+          scene.add(tile);
+          tiles.push(tile);
         }
+      }
 
-        default:
-            break;
-    }
+      tiles.forEach((tile) => {
+        tile.addEventListener("click", () => {
+          console.log("tile clicked");
+        });
+      });
 
-    // Play the seed selection sound
-    audioLoader.load('./SoundFiles/seedSelect.mp3', (buffer) => {
-        soundEffect1.setBuffer(buffer);
-        soundEffect1.setLoop(false);
-        soundEffect1.setVolume(1);
-        soundEffect1.play();
-    });
-  });
-});
+      // Reference the sun count element in the GUI
+      const sunCounterElement = document.getElementById("sunText");
 
-// Load the zombie model and get the animation update function
-var basicZombie = new BasicZombie('basic', 1000, camera, scene);
-const zombieUpdateFns = [];
+      const lawnBounds = {
+        xMin: lawn.tiles[0][0].position.x, // First tile in the first row
+        xMax: lawn.tiles[0][lawn.tiles[0].length - 1].position.x, // Last tile in the first row
+        zMin: lawn.tiles[0][0].position.z, // First row
+        zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
+      };
 
-// Handle the shovel being clicked
-let shovelActive = false;
-const shovel = document.getElementById('shovel');
-shovel.addEventListener('click', () => {
-    if (shovelActive == false){
-        shovelActive = true;
-        raycasting = true;
-    } else {
-        shovelActive = false;
-        raycasting = false;
-    }
-    console.log("shovel selected");
-    shovelSound.play();
-})
+      // Instantiate the SunSystem
+      const sunSystem = new SunSystem(
+        scene,
+        sunCounterElement,
+        lawnBounds,
+        camera,
+      );
 
-// Handle the start button being clicked
-const startButton = document.getElementById('startButton');
-startButton.addEventListener('click', () => {
-    startButton.style.display = 'none'; // Hide the button after it has been clicked
-    game.startGame();
-    gameStarted = true;
-    levelMusic.play();
-    camera.position.set(30, 50, 80);
-    camera.lookAt( new THREE.Vector3(camera.position.x,0.0,0.0));
+      // Spawn suns timer
+      setInterval(() => {
+        sunSystem.spawnSun();
+      }, 10000); // 10 seconds
 
-    setTimeout(() => {
-        soundEffect3.play();
-    },10000)
-});
+      let updateAnimation; // This will hold the animation update function
+      const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
 
-// Texture Loader
-var texLoader = new THREE.TextureLoader();
-var grass1 = texLoader.load('Textures/grass1.jpg');
-var grass2 = texLoader.load('Textures/grass2.jpg');
+      // Mouse movements
+      const mouse = new THREE.Vector2();
+      const plane = new THREE.Plane(new THREE.Vector3(0, 10, 1), 0);
+      const planeIntersection = new THREE.Vector3();
 
-// Add the lawn to the scene
-var tiles = [];
-var lawn = new Lawn(grass1, grass2, 8, 8, 8);
-var lawnGeneration = lawn.generateLawn();
+      function OnMouseMove(event) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+      }
 
-// Add the house to the scene
-var house = new House([64, 8, 64], 0xdbd6c8, [-36, 0, 16]);
-var houseGeneration = house.generateHouse();
-scene.add(houseGeneration);
+      function onClick(event) {
+        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
 
-// Add the zombie spawn location to the scene
-var spawn = new SpawnLocation();
-var generateSpawn = spawn.generateSpawnLocation();
-scene.add(generateSpawn);
+        if (raycasting) {
+          raycaster.setFromCamera(mouse, camera);
+          const intersects = raycaster.intersectObjects(tiles);
 
-// Generate the lawn
-for (let i = 0; i < lawnGeneration.length; i++){
-    for (let j = 0; j < lawnGeneration[i].length; j++){
-        const tile = lawnGeneration[i][j];
-        tile.receiveShadow = true; // Enable shadow receiving
-        scene.add(tile);
-        tiles.push(tile);
-    }
-}
+          const text = document.getElementById("sunText");
 
-tiles.forEach(tile => {
-    tile.addEventListener('click', () => {
-        console.log("tile clicked");
-    });
-});
-
-// Reference the sun count element in the GUI
-const sunCounterElement = document.getElementById('sunText');
-
-const lawnBounds = {
-    xMin: lawn.tiles[0][0].position.x, // First tile in the first row
-    xMax: lawn.tiles[0][lawn.tiles[0].length - 1].position.x, // Last tile in the first row
-    zMin: lawn.tiles[0][0].position.z, // First row
-    zMax: lawn.tiles[lawn.tiles.length - 1][0].position.z, // Last row
-};
-
-// Instantiate the SunSystem
-const sunSystem = new SunSystem(scene, sunCounterElement, lawnBounds, camera);
-
-// Spawn suns timer
-setInterval(() => {
-    sunSystem.spawnSun();
-}, 10000); // 10 seconds
-
-
-let updateAnimation; // This will hold the animation update function
-const clock = new THREE.Clock(); // Create a clock to track time for smooth animations
-
-// Mouse movements 
-const mouse = new THREE.Vector2();
-const plane = new THREE.Plane(new THREE.Vector3(0, 10, 1), 0);
-const planeIntersection = new THREE.Vector3();
-
-function OnMouseMove(event){
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-}
-
-function onClick(event) {
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    if (raycasting) {
-        raycaster.setFromCamera(mouse, camera);
-        const intersects = raycaster.intersectObjects(tiles);
-
-        const text = document.getElementById('sunText');
-
-        if (intersects.length > 0) {
+          if (intersects.length > 0) {
             const clickedObj = intersects[0].object;
 
-            if (lawn.getTileStatus(clickedObj) == true && shovelActive == false) {
-                console.log("Can't plant here");
-            } else if (shovelActive == true && lawn.getTileStatus(clickedObj) == true){
-                console.log("tile emptied");
-                lawn.emptyTile(clickedObj);
-                let temp = lawn.getPlantAtTile(clickedObj);
-                scene.remove(temp);
-                plantsActive.splice(plantsActive.indexOf(temp.parent), 1);
-                raycasting = false;
-                shovelActive = false;
+            if (
+              lawn.getTileStatus(clickedObj) == true &&
+              shovelActive == false
+            ) {
+              console.log("Can't plant here");
+            } else if (
+              shovelActive == true &&
+              lawn.getTileStatus(clickedObj) == true
+            ) {
+              console.log("tile emptied");
+              lawn.emptyTile(clickedObj);
+              let temp = lawn.getPlantAtTile(clickedObj);
+              scene.remove(temp);
+              plantsActive.splice(plantsActive.indexOf(temp.parent), 1);
+              raycasting = false;
+              shovelActive = false;
+            } else {
+              let currPlant = plants.pop(); // Get the selected plant
+              plantsActive.push(currPlant);
+              updateSunCount(currPlant.getCost());
 
-            }else {
-                let currPlant = plants.pop();  // Get the selected plant
-                plantsActive.push(currPlant);
-                updateSunCount(currPlant.getCost());
-                
+              // Play the planting sound
+              audioLoader.load("./SoundFiles/plant.mp3", (buffer) => {
+                soundEffect2.setBuffer(buffer);
+                soundEffect2.setLoop(false);
+                soundEffect2.setVolume(1);
+                soundEffect2.play();
+              });
 
-                // Play the planting sound
-                audioLoader.load('./SoundFiles/plant.mp3', (buffer) => {
-                    soundEffect2.setBuffer(buffer);
-                    soundEffect2.setLoop(false);
-                    soundEffect2.setVolume(1);
-                    soundEffect2.play();
-                });
-
- 
-                // Add the plant to the scene
-                (async () => {
-                    try {
-                        const model = await currPlant.generatePlant(clickedObj.position.x + 0.5, clickedObj.position.y + 5, clickedObj.position.z +4);
-                        model.traverse((node) => {
-                        if (node.isMesh) {
-                            node.castShadow = true; // Enable shadow casting
-                        }
-                    });
-                        scene.add(model);
-                        
-                
-                    } catch (error) {
-                        console.error("Failed to add model to the scene", error);
+              // Add the plant to the scene
+              (async () => {
+                try {
+                  const model = await currPlant.generatePlant(
+                    clickedObj.position.x + 0.5,
+                    clickedObj.position.y + 5,
+                    clickedObj.position.z + 4,
+                  );
+                  model.traverse((node) => {
+                    if (node.isMesh) {
+                      node.castShadow = true; // Enable shadow casting
                     }
-                })();
-            
-                lawn.occupyTile(clickedObj, currPlant);
-                raycasting = false;
-                plantSelected = false;
+                  });
+                  scene.add(model);
+                } catch (error) {
+                  console.error("Failed to add model to the scene", error);
+                }
+              })();
+
+              lawn.occupyTile(clickedObj, currPlant);
+              raycasting = false;
+              plantSelected = false;
             }
+          }
         }
-    }
-}
+      }
 
-// Zombies to animate
-let zombies = game.transferZombies();
-let activeZombies = [];
-let activePeas = false;
+      // Zombies to animate
+      let zombies = game.transferZombies();
+      let activeZombies = [];
+      let activePeas = false;
 
-window.addEventListener('click', onClick, false);
-window.addEventListener('mousemove', OnMouseMove, false);
+      window.addEventListener("click", onClick, false);
+      window.addEventListener("mousemove", OnMouseMove, false);
 
-let elapsedTimed = 0;
-let zombiesSpawnTime = 0;
-let coneheadSpawnTime = 0;
-let minDistance = Infinity;
-let closestZombie;
-let lastShotTime = 0;
-let peasToAnimate = [];
-// Animation loop
-function animate() {
-    requestAnimationFrame(animate); // Request the next frame
+      let elapsedTimed = 0;
+      let zombiesSpawnTime = 0;
+      let coneheadSpawnTime = 0;
+      let minDistance = Infinity;
+      let closestZombie;
+      let lastShotTime = 0;
+      let peasToAnimate = [];
+      // Animation loop
+      function animate() {
+        requestAnimationFrame(animate); // Request the next frame
 
-    const delta = clock.getDelta(); // Get the time delta for the frame
+        const delta = clock.getDelta(); // Get the time delta for the frame
 
-    basicZombie.updateZombiePosition();
-    if (gameStarted){
-        zombiesSpawnTime += delta;
-        coneheadSpawnTime += delta;
+        basicZombie.updateZombiePosition();
+        if (gameStarted) {
+          zombiesSpawnTime += delta;
+          coneheadSpawnTime += delta;
 
-        if (zombiesSpawnTime >= 30){
-          
+          if (zombiesSpawnTime >= 30) {
             game.spawnZombies();
             zombiesSpawnTime = 0;
-        }
+          }
 
-        if (coneheadSpawnTime >= 45){
-           
+          if (coneheadSpawnTime >= 45) {
             game.spawnConeHeads();
             coneheadSpawnTime = 0;
+          }
         }
-    };
-  
-    for (let i = 0; i < zombies.length; i++){
 
-        zombies[i].loadZombie(scene).then((updateFn) => {
-            zombieUpdateFns.push(updateFn);// Assign the update function when the promise resolves
-        }).catch((error) => {
-            console.error("Error loading the zombie:", error);
+        for (let i = 0; i < zombies.length; i++) {
+          zombies[i]
+            .loadZombie(scene)
+            .then((updateFn) => {
+              zombieUpdateFns.push(updateFn); // Assign the update function when the promise resolves
+            })
+            .catch((error) => {
+              console.error("Error loading the zombie:", error);
+            });
+
+          activeZombies.push(zombies[i]);
+          zombies.splice(zombies[i], 1);
+        }
+
+        plantsActive.forEach((plant) => {
+          if (
+            plant.getName() === "peashooter" ||
+            plant.getName() === "Snowpea"
+          ) {
+            if (activeZombies.length > 0) {
+              let delay = plant.getDelay();
+              try {
+                activeZombies.forEach((zombie, i) => {
+                  if (plant.detectIntersection(zombie) && zombie.isAlive) {
+                    plant.setDistanceTo(
+                      plant.model.position.distanceTo(zombie.model.position),
+                    );
+
+                    if (plant.getDistanceTo() < plant.getMinDistance()) {
+                      plant.setMinDistance(plant.getDistanceTo());
+                      plant.setClosestZombie(zombie);
+                      plant.setDelay(plant.getDelay() + delta);
+
+                      if (plant.getDelay() >= 2) {
+                        console.log("Zombie detected and shooting...");
+                        if (plant.shootPea(plant.getClosestZombie(), scene)) {
+                          plant.setDelay(0);
+                        }
+
+                        if (!zombie.isAlive) {
+                          console.log("Zombie eliminated.");
+                          plant.setMinDistance(Infinity);
+                          plant.setClosestZombie(null);
+                          activeZombies.splice(i, 1);
+                        }
+                      }
+                    }
+                  }
+                });
+              } catch (error) {
+                console.error("Error processing plants: ", error);
+              }
+            }
+          }
+
+          if (plant.getName() == "sunflower") {
+            elapsedTimed += delta;
+
+            // Give sun every 18 seconds
+            if (elapsedTimed >= 18) {
+              scene.add(plant.giveSun());
+
+              elapsedTimed = 0;
+            }
+          }
         });
 
-        activeZombies.push(zombies[i]);
-        zombies.splice(zombies[i], 1);
-    }
-    
-    plantsActive.forEach((plant) => {
-    if (plant.getName() === 'peashooter' || plant.getName() === 'Snowpea') {
-        if (activeZombies.length > 0) {
-            let delay = plant.getDelay();
-            try {
-                activeZombies.forEach((zombie, i) => {
-                    if (plant.detectIntersection(zombie) && zombie.isAlive) {
-                        plant.setDistanceTo(plant.model.position.distanceTo(zombie.model.position));
-
-                        if (plant.getDistanceTo() < plant.getMinDistance()) {
-                            plant.setMinDistance(plant.getDistanceTo());
-                            plant.setClosestZombie(zombie);
-                            plant.setDelay(plant.getDelay() + delta);
-
-                            if (plant.getDelay() >= 2) {
-                                console.log("Zombie detected and shooting...");
-                                if (plant.shootPea(plant.getClosestZombie(), scene)) {
-                                    plant.setDelay(0);
-                                }
-
-                                if (!zombie.isAlive) {
-                                    console.log("Zombie eliminated.");
-                                    plant.setMinDistance(Infinity);
-                                    plant.setClosestZombie(null);
-                                    activeZombies.splice(i, 1);
-                                }
-                            }
-                        }
-                    }
-                });
-            } catch (error) {
-                console.error("Error processing plants: ", error);
-            }
-        }
-    }
-
-
-        if (plant.getName() == 'sunflower'){
-            elapsedTimed += delta;
-            
-          
-            // Give sun every 18 seconds
-            if (elapsedTimed >= 18){
-                scene.add(plant.giveSun());
-               
-                elapsedTimed = 0;
-            }
-                
-            
-           
-        }
-    })
-
-    activeZombies.forEach((zombie) => {
-        zombie.updateZombiePosition();
-
-      
-
-    })
-    // Set tile to normal color unless raycasting
-    tiles.forEach(tile => {
-        tile.material.emissive.setHex(0x000000);
-        
-    });
-    if (raycasting){
-
-        raycaster.setFromCamera(mouse, camera);
-        let intersects = raycaster.intersectObjects(tiles);
-        for (let i = 0; i < intersects.length; i++){
-         
+        activeZombies.forEach((zombie) => {
+          zombie.updateZombiePosition();
+        });
+        // Set tile to normal color unless raycasting
+        tiles.forEach((tile) => {
+          tile.material.emissive.setHex(0x000000);
+        });
+        if (raycasting) {
+          raycaster.setFromCamera(mouse, camera);
+          let intersects = raycaster.intersectObjects(tiles);
+          for (let i = 0; i < intersects.length; i++) {
             intersects[0].object.material.emissive.setHex(0x505050);
+          }
         }
-        
-    }
 
-    if (updateAnimation) updateAnimation(delta); // Call the update function if available
+        if (updateAnimation) updateAnimation(delta); // Call the update function if available
 
-    zombieUpdateFns.forEach((updateFn) =>{
-        updateFn(delta);
-    })
+        zombieUpdateFns.forEach((updateFn) => {
+          updateFn(delta);
+        });
 
-    renderer.render(scene, camera); // Render the scene
-}
+        renderer.render(scene, camera); // Render the scene
+      }
 
-animate(); // Start the animation loop
-
+      animate(); // Start the animation loop
     </script>
-</body>
+  </body>
 </html>

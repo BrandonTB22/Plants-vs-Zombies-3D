@@ -33,7 +33,7 @@ getHealth(){
 
 updateZombiePosition(){
     if (this.model != null){
-        this.model.position.x -= 0.027;
+        this.model.position.x -= 0.010;
     }
 }
 
