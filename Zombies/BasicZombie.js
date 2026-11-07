@@ -2,10 +2,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { AnimationMixer, QuaternionKeyframeTrack, AnimationClip, Vector3, Quaternion } from 'three';
 import THREE from '../threejsModule';
 import { GameLogic } from '../GameLogic';
+import { Zombie } from './Zombie';
 
-class BasicZombie {
+class BasicZombie extends Zombie {
     constructor(type, health, scene){
-        this.type = type;
+        super(type, health)
         this.health = 500;
         this.model;
         this.spawns = [0, 8, 16, 24, 32]

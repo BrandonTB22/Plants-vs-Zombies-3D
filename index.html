@@ -9,7 +9,7 @@
   <body>
     <div id="gui">
       <div id="sunEnergy">
-        <h3 id="sunText">50</h3>
+        <h3 id="sunText">1000</h3>
       </div>
       <div id="plantSlots">
         <!-- Plant slots -->
@@ -27,7 +27,8 @@
 
     <div id="menu_screen">
       <img id="logo" src="./assets/pvz_logo.png" alt="logo" />
-      <button id="startButton">Let's Rock!</button>
+      <button class="button" id="startButton">Let's Rock!</button>
+      <button class="button" id="infoButton">How to Play</button>
     </div>
 
     <canvas id="myCanvas"></canvas>
@@ -128,9 +129,10 @@
 
       const audioLoader = new THREE.AudioLoader();
       const levelMusic = new THREE.Audio(listener);
-      const soundEffect1 = new THREE.Audio(listener);
+      const seedSelect = new THREE.Audio(listener);
       const soundEffect2 = new THREE.Audio(listener);
       const soundEffect3 = new THREE.Audio(listener);
+      const buzzer = new THREE.Audio(listener);
 
       const shovelSound = new THREE.Audio(listener);
 
@@ -149,6 +151,18 @@
         levelMusic.setBuffer(buffer);
         levelMusic.setLoop(true);
         levelMusic.setVolume(0.5);
+      });
+
+      audioLoader.load("./SoundFiles/seedSelect.mp3", (buffer) => {
+        seedSelect.setBuffer(buffer);
+        seedSelect.setLoop(false);
+        seedSelect.setVolume(1);
+      });
+
+      audioLoader.load("./soundFiles/buzzer.mp3", (buffer) => {
+        buzzer.setBuffer(buffer);
+        buzzer.setLoop(false);
+        buzzer.setVolume(1.0);
       });
 
       // An object pool for the plants
@@ -178,6 +192,7 @@
                 parseInt(document.getElementById("sunText").textContent) >= 100
               ) {
                 // Peashooter selection logic
+                seedSelect.play();
                 let peashooter;
                 if (plantSelected) {
                   plantSelected = false;
@@ -199,7 +214,7 @@
                       "Plants/peashooter/scene.gltf",
                       0,
                       3,
-                      -2,
+                      -4,
                       0,
                       1.5,
                       0,
@@ -213,6 +228,11 @@
                     plants.push(checkForPlant("peashooter"));
                   }
                 }
+              } else {
+                console.log("You don't have enough sun!");
+                raycasting = false;
+
+                buzzer.play();
               }
               break;
 
@@ -222,6 +242,7 @@
               ) {
                 // snowpea selection logic
                 let snowpea;
+                seedSelect.play();
                 if (plantSelected) {
                   plantSelected = false;
                   raycasting = false;
@@ -256,6 +277,9 @@
                     plants.push(checkForPlant("snowpea"));
                   }
                 }
+              } else {
+                buzzer.play();
+                raycasting = false;
               }
               break;
 
@@ -265,6 +289,7 @@
               if (
                 parseInt(document.getElementById("sunText").textContent) >= 50
               ) {
+                seedSelect.play();
                 let sunflower;
 
                 if (plantSelected) {
@@ -303,13 +328,16 @@
                     plants.push(checkForPlant("sunflower"));
                   }
                 }
+              } else {
+                buzzer.play();
+                raycasting = false;
               }
               break;
 
             case 4:
               // Repeater selection logic
               let repeater;
-
+              seedSelect.play();
               if (plantSelected) {
                 plantSelected = false;
                 raycasting = false;
@@ -346,16 +374,12 @@
             default:
               break;
           }
-
-          // Play the seed selection sound
-          audioLoader.load("./SoundFiles/seedSelect.mp3", (buffer) => {
-            soundEffect1.setBuffer(buffer);
-            soundEffect1.setLoop(false);
-            soundEffect1.setVolume(1);
-            soundEffect1.play();
-          });
         });
       });
+
+      function seedSelectPlay() {
+        // Play the seed selection sound
+      }
 
       // Load the zombie model and get the animation update function
       var basicZombie = new BasicZombie("basic", 1000, camera, scene);
@@ -590,35 +614,69 @@
             plant.getName() === "Snowpea"
           ) {
             if (activeZombies.length > 0) {
-              let delay = plant.getDelay();
               try {
-                activeZombies.forEach((zombie, i) => {
-                  if (plant.detectIntersection(zombie) && zombie.isAlive) {
-                    plant.setDistanceTo(
-                      plant.model.position.distanceTo(zombie.model.position),
-                    );
+                if (plant.getName() === "peashooter") {
+                  let closestZombie = null;
+                  let minDistance = Infinity;
 
-                    if (plant.getDistanceTo() < plant.getMinDistance()) {
-                      plant.setMinDistance(plant.getDistanceTo());
-                      plant.setClosestZombie(zombie);
-                      plant.setDelay(plant.getDelay() + delta);
+                  activeZombies.forEach((zombie) => {
+                    if (
+                      plant.model &&
+                      zombie.model &&
+                      zombie.isAlive &&
+                      plant.getZPosition() === zombie.model.position.z &&
+                      zombie.model.position.x >= plant.model.position.x
+                    ) {
+                      const distance = plant.model.position.distanceTo(
+                        zombie.model.position,
+                      );
 
-                      if (plant.getDelay() >= 2) {
-                        console.log("Zombie detected and shooting...");
-                        if (plant.shootPea(plant.getClosestZombie(), scene)) {
-                          plant.setDelay(0);
-                        }
+                      if (distance < minDistance) {
+                        minDistance = distance;
+                        closestZombie = zombie;
+                      }
+                    }
+                  });
 
-                        if (!zombie.isAlive) {
-                          console.log("Zombie eliminated.");
-                          plant.setMinDistance(Infinity);
-                          plant.setClosestZombie(null);
-                          activeZombies.splice(i, 1);
+                  if (closestZombie) {
+                    plant.setClosestZombie(closestZombie);
+                    plant.shootPea(closestZombie, scene);
+                  } else {
+                    plant.setClosestZombie(null);
+                  }
+                } else {
+                  activeZombies.forEach((zombie, i) => {
+                    if (
+                      plant.model &&
+                      zombie.model &&
+                      plant.detectIntersection(zombie) &&
+                      zombie.isAlive
+                    ) {
+                      plant.setDistanceTo(
+                        plant.model.position.distanceTo(zombie.model.position),
+                      );
+
+                      if (plant.getDistanceTo() < plant.getMinDistance()) {
+                        plant.setMinDistance(plant.getDistanceTo());
+                        plant.setClosestZombie(zombie);
+                        plant.setDelay(plant.getDelay() + delta);
+
+                        if (plant.getDelay() >= 2) {
+                          if (plant.shootPea(plant.getClosestZombie(), scene)) {
+                            plant.setDelay(0);
+                          }
+
+                          if (!zombie.isAlive) {
+                            console.log("Zombie eliminated.");
+                            plant.setMinDistance(Infinity);
+                            plant.setClosestZombie(null);
+                            activeZombies.splice(i, 1);
+                          }
                         }
                       }
                     }
-                  }
-                });
+                  });
+                }
               } catch (error) {
                 console.error("Error processing plants: ", error);
               }

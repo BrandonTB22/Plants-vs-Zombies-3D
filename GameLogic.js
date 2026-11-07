@@ -1,7 +1,9 @@
 
-import THREE from "./threejsModule";
+// Load models
 import { BasicZombie } from "./Zombies/BasicZombie";
 import { ConeHeadZombie } from "./Zombies/ConeHeadZombie";
+
+// Main class to run game logic
 class GameLogic{
     constructor(scene, lawn, camera){
         this.transfer =[];
@@ -14,14 +16,14 @@ class GameLogic{
 
     }
 
+    // Starts the game
     startGame(){
-        let coolDown = 10000;
-
-        console.log("Game has started!");
+ 
+        console.log("Game has started!"); // Log that game has started
 
         // Begin with an initial zombie
         setTimeout(() => {
-            let basicZombie = new BasicZombie('basic', 200, this.camera, this.scene);
+            let basicZombie = new BasicZombie('basic', 500, this.scene);
             this.transfer.push(basicZombie);
             this.zombiesActive.push(basicZombie);
         }, 5000)
@@ -37,6 +39,7 @@ class GameLogic{
         this.availableZombies.push(zombie);
     }
 
+    // Spawn a zombie on the lawn
     spawnZombies(){
         
             if (this.availableZombies.length > 0){
@@ -52,7 +55,7 @@ class GameLogic{
        
     }
 
-
+    
     spawnConeHeads(){
         let condehead = this.availableZombies.find(zombie => zombie.getType() == 'conehead');
             

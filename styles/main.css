@@ -5,24 +5,37 @@
 
 #menu_screen {
     position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
     height: 100%;
     background-color: #000000;
     color: #fff;
 }
 
-#startButton {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+.button {
+    margin: 10px;
     padding: 20px 40px;
     font-size: 24px;
-    background-color: #4a9930;
     color: #fff;
     border: none;
     cursor: pointer;
     border-radius: 5px;
+}
+
+#menu_screen .button:hover {
+    background-color: #d3d3d3;
+    color: #000;
+}
+
+
+#startButton {
+    background-color: #4a9930;
+}
+
+#infoButton {
+    background-color: rgb(134, 142, 214);
 }
 
 #logo {
@@ -38,9 +51,7 @@
     cursor: pointer;
     border-radius: 5px;
 }
-#startButton:hover {
-    background-color: #444;
-}
+
 
 /* GUI Container */
 #gui {

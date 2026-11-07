@@ -3,7 +3,6 @@ import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import { Plant } from './Plant.js';
 
-
 // Name: peashooter; Cost: 100 sun
 class Peashooter extends Plant {
     constructor(name, health, cost, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ) {
@@ -11,7 +10,7 @@ class Peashooter extends Plant {
           // Additional properties for Peashooter
         this.raycaster = new THREE.Raycaster();
         this.peagenerated = false;
-        this.shootCooldown = 1000;
+        this.shootCooldown = 2000;
         this.lastTimeShot = 0;
         this.zombie;
         this.health;
@@ -22,12 +21,10 @@ class Peashooter extends Plant {
         this.closestZombie;
         this.intersects;
         this.delay = 0;
-
-
     }
 
-    setMinDistance(distnace){
-        this.minDistance = distnace;
+    setMinDistance(distance){
+        this.minDistance = distance;
     }
 
     getMinDistance(){
@@ -126,6 +123,10 @@ class Peashooter extends Plant {
         }
     }
 
+    getZPosition(){
+        return this.model.position.z;
+    }
+
     setDelay(delay){
         this.delay = delay;
     }
@@ -133,17 +134,15 @@ class Peashooter extends Plant {
     getDelay(){
         return this.delay;
     }
+
+
     
     // Shoot a pea if a zombie is detected
     shootPea(target, scene, delay){
-        let time = Date.now();
-        let velocity = 0.3;
         let zombie = target;
         let tar = target.model.getObjectByName('hitbox');
 
-        const speed = 0.3;
         const maxPos = 90;
-        const coolDown = 2000;
         const startPos = this.model.position.x;
 
         // Generate the pea if not already
@@ -158,31 +157,40 @@ class Peashooter extends Plant {
         } 
         
         if (zombie.getHealth() <= 0){
+            this.pea.visible = false;
             return false;
         }
-        // Make sure that the pea is visible
-        this.pea.visible = true;
+
+        if (!this.pea.visible) {
+            if (!this.canShoot()) {
+                return false;
+            }
+
+            this.pea.position.set(
+                this.model.position.x + 5,
+                this.model.position.y + 1.8,
+                this.model.position.z,
+            );
+            this.pea.visible = true;
+            this.lastTimeShot = Date.now();
+        }
             
         // If the pea goes beyond the max distance, set it back to the original position
         if (this.pea.position.x >= tar.parent.position.x){
             this.pea.position.x = startPos;
+            this.pea.visible = false;
             zombie.reduceHealth(100);
-            console.log(zombie.getHealth());
             return false;
             
         } else if (this.pea.position.x < maxPos){
             this.pea.position.x += 0.3;
         
-        } else if(this.pea.position.x > maxPos){
+        } else {
+            this.pea.position.x = startPos;
+            this.pea.visible = false;
             return false;
         }
     }
 }
-
-
-
-    
-        
-
 
 export {Peashooter}
