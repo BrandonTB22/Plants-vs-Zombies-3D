@@ -9,7 +9,7 @@
   <body>
     <div id="gui">
       <div id="sunEnergy">
-        <h3 id="sunText">1000</h3>
+        <h3 id="sunText">500</h3>
       </div>
       <div id="plantSlots">
         <!-- Plant slots -->
@@ -54,6 +54,8 @@
       import { BasicZombie } from "./Zombies/BasicZombie.js";
       import { ConeHeadZombie } from "./Zombies/ConeheadZombie.js";
       import { Lawnmower } from "./Lawnmower";
+
+      globalThis.DEBUG = false; // Use for debuging
 
       let raycasting = false;
 
@@ -377,12 +379,9 @@
         });
       });
 
-      function seedSelectPlay() {
-        // Play the seed selection sound
-      }
-
       // Load the zombie model and get the animation update function
-      var basicZombie = new BasicZombie("basic", 1000, camera, scene);
+      var basicZombie = new BasicZombie("basic", 500, scene);
+
       const zombieUpdateFns = [];
 
       // Handle the shovel being clicked
@@ -512,9 +511,12 @@
             ) {
               console.log("tile emptied");
               lawn.emptyTile(clickedObj);
-              let temp = lawn.getPlantAtTile(clickedObj);
-              scene.remove(temp);
-              plantsActive.splice(plantsActive.indexOf(temp.parent), 1);
+              const plant = lawn.getPlantObjectAtTile(clickedObj);
+              scene.remove(plant.model);
+              if (typeof plant.removeDetectionZone === "function") {
+                plant.removeDetectionZone(scene);
+              }
+              plantsActive.splice(plantsActive.indexOf(plant), 1);
               raycasting = false;
               shovelActive = false;
             } else {
@@ -544,6 +546,9 @@
                     }
                   });
                   scene.add(model);
+                  if (currPlant.getName() === "peashooter") {
+                    currPlant.generateDetectionZone(scene, model.position);
+                  }
                 } catch (error) {
                   console.error("Failed to add model to the scene", error);
                 }
@@ -570,8 +575,7 @@
       let coneheadSpawnTime = 0;
       let minDistance = Infinity;
       let closestZombie;
-      let lastShotTime = 0;
-      let peasToAnimate = [];
+
       // Animation loop
       function animate() {
         requestAnimationFrame(animate); // Request the next frame
@@ -579,6 +583,7 @@
         const delta = clock.getDelta(); // Get the time delta for the frame
 
         basicZombie.updateZombiePosition();
+
         if (gameStarted) {
           zombiesSpawnTime += delta;
           coneheadSpawnTime += delta;
@@ -588,7 +593,7 @@
             zombiesSpawnTime = 0;
           }
 
-          if (coneheadSpawnTime >= 45) {
+          if (coneheadSpawnTime >= 4500) {
             game.spawnConeHeads();
             coneheadSpawnTime = 0;
           }
@@ -608,6 +613,15 @@
           zombies.splice(zombies[i], 1);
         }
 
+        // Update every active zombie each frame
+        activeZombies.forEach((zombie) => {
+          zombie.updateZombiePosition();
+          if (zombie.hitbox != null && zombie.mesh != null) {
+            zombie.hitbox.setFromObject(zombie.mesh);
+          }
+        });
+
+        // Update each plant every frame
         plantsActive.forEach((plant) => {
           if (
             plant.getName() === "peashooter" ||
@@ -615,74 +629,33 @@
           ) {
             if (activeZombies.length > 0) {
               try {
+                // Peashooter case
                 if (plant.getName() === "peashooter") {
-                  let closestZombie = null;
-                  let minDistance = Infinity;
-
-                  activeZombies.forEach((zombie) => {
+                  for (let i = 0; i < activeZombies.length; i++) {
                     if (
-                      plant.model &&
-                      zombie.model &&
-                      zombie.isAlive &&
-                      plant.getZPosition() === zombie.model.position.z &&
-                      zombie.model.position.x >= plant.model.position.x
+                      activeZombies[i].hitbox != null &&
+                      plant.boundingBox != null
                     ) {
-                      const distance = plant.model.position.distanceTo(
-                        zombie.model.position,
-                      );
-
-                      if (distance < minDistance) {
-                        minDistance = distance;
-                        closestZombie = zombie;
+                      if (
+                        plant.boundingBox.intersectsBox(
+                          activeZombies[i].hitbox,
+                        ) &&
+                        !plant.getZombiesInRange().includes(activeZombies[i])
+                      ) {
+                        plant.addInRangeZombie(activeZombies[i]);
                       }
                     }
-                  });
-
-                  if (closestZombie) {
-                    plant.setClosestZombie(closestZombie);
-                    plant.shootPea(closestZombie, scene);
-                  } else {
-                    plant.setClosestZombie(null);
                   }
-                } else {
-                  activeZombies.forEach((zombie, i) => {
-                    if (
-                      plant.model &&
-                      zombie.model &&
-                      plant.detectIntersection(zombie) &&
-                      zombie.isAlive
-                    ) {
-                      plant.setDistanceTo(
-                        plant.model.position.distanceTo(zombie.model.position),
-                      );
-
-                      if (plant.getDistanceTo() < plant.getMinDistance()) {
-                        plant.setMinDistance(plant.getDistanceTo());
-                        plant.setClosestZombie(zombie);
-                        plant.setDelay(plant.getDelay() + delta);
-
-                        if (plant.getDelay() >= 2) {
-                          if (plant.shootPea(plant.getClosestZombie(), scene)) {
-                            plant.setDelay(0);
-                          }
-
-                          if (!zombie.isAlive) {
-                            console.log("Zombie eliminated.");
-                            plant.setMinDistance(Infinity);
-                            plant.setClosestZombie(null);
-                            activeZombies.splice(i, 1);
-                          }
-                        }
-                      }
-                    }
-                  });
+                  plant.shootPea(scene);
                 }
               } catch (error) {
                 console.error("Error processing plants: ", error);
               }
+            } else {
             }
           }
 
+          // Sunflower case
           if (plant.getName() == "sunflower") {
             elapsedTimed += delta;
 
@@ -695,13 +668,12 @@
           }
         });
 
-        activeZombies.forEach((zombie) => {
-          zombie.updateZombiePosition();
-        });
         // Set tile to normal color unless raycasting
         tiles.forEach((tile) => {
           tile.material.emissive.setHex(0x000000);
         });
+
+        // Raycasting, set tile to highlight
         if (raycasting) {
           raycaster.setFromCamera(mouse, camera);
           let intersects = raycaster.intersectObjects(tiles);

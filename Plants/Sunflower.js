@@ -6,13 +6,20 @@ class Sunflower extends Plant {
     constructor(name, health, cost, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ) {
         super(name, cost, health, modelPath, Xadj, Yadj, Zadj, rotX, rotY, rotZ, scaleX, scaleY, scaleZ);
       
-        this.sunTime = 5000; // 24 seconds it gives sun
+        this.sunTime = 24000; // 24 seconds it gives sun
         this.sun;
         this.currentSun;
         this.activeSuns = [];
         this.sunValue = 25;
         this.camera;
         this.counter;
+
+        // Sound when clicked
+        this.clickSound = new THREE.AudioListener();
+        const clickSoundLoader = new THREE.AudioLoader();
+        clickSoundLoader.load("./SoundFiles/sunPickup.mp3", (buffer) => {
+            this.clickSoundBuffer = buffer;
+        });
         
          // Initialize raycaster for click detection
          this.raycaster = new THREE.Raycaster();
@@ -41,11 +48,11 @@ class Sunflower extends Plant {
         return this.cost;
     }
 
+    // Handle click events for sun collection
     handleClick(event) {
         // Update mouse position for raycasting
         this.mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
         this.mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
 
         // Perform raycasting to detect suns
         this.raycaster.setFromCamera(this.mouse, this.camera);
@@ -54,7 +61,12 @@ class Sunflower extends Plant {
         if (intersects.length > 0) {
             
             const clickedSun = intersects[0].object;
-            clickedSun.visible = false;
+            this.activeSuns.splice(this.activeSuns.indexOf(clickedSun), 1);
+            clickedSun.removeFromParent();
+
+            const clickSound = new THREE.Audio(this.clickSound);
+            clickSound.setBuffer(this.clickSoundBuffer);
+            clickSound.play();
 
             this.updateSunCount(this.counter);
         }
@@ -70,7 +82,9 @@ class Sunflower extends Plant {
        
             this.sun.position.set(this.model.position.x, this.model.position.y + 3, this.model.position.z + 2);
             this.sun.visible = true;
-            console.log("giving sun");
+            if (!this.activeSuns.includes(this.sun)) {
+                this.activeSuns.push(this.sun);
+            }
     
             return this.sun;
 

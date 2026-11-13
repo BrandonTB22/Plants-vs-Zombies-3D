@@ -23,7 +23,7 @@ class GameLogic{
 
         // Begin with an initial zombie
         setTimeout(() => {
-            let basicZombie = new BasicZombie('basic', 500, this.scene);
+            let basicZombie = new BasicZombie('basic', 1000, this.scene);
             this.transfer.push(basicZombie);
             this.zombiesActive.push(basicZombie);
         }, 5000)
@@ -44,10 +44,15 @@ class GameLogic{
         
             if (this.availableZombies.length > 0){
                 let temp = this.availableZombies.pop();
-                //this.transfer.push(temp);
                 this.zombiesActive.push(temp)
             } else {
-                let basicZombie = new BasicZombie('basic', 500, this.camera, this.scene);
+                let basicZombie = new BasicZombie('basic', 1000, this.scene);
+
+                setTimeout(() => {
+                     //basicZombie.createBoundingBox(this.scene, basicZombie.model);
+                }, 1000)
+               
+                
                 this.transfer.push(basicZombie);
                 this.zombiesActive.push(basicZombie);
             }

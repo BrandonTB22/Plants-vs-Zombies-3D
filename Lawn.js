@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+
+// Represents the lawn that can be planted on
 class Lawn{
 
     constructor(texture1, texture2, sizeX, sizeY, sizeZ){
@@ -15,7 +17,7 @@ class Lawn{
         this.occupiedTiles = []; // Tiles that have plants on them
     }
 
-    // Create the lawn
+    // Create the lawn 5x9 tiles
     generateLawn(){
         
         for (let i = 0; i < 5; i++){ // Each row
@@ -43,23 +45,29 @@ class Lawn{
         return this.tiles;
     }
 
+    // Update the plant map when a plant is occupies a tile
     occupyTile(tile, plant){
         this.occupiedTiles.push(tile);
-
         this.plantMap.set(tile, plant);
-        
     }
 
+    // Return plant at given tile
     getPlantAtTile(tile){
         const toDelete = this.plantMap.get(tile);
-        
         return toDelete.model;
     }
 
+    // Return plant object at tile
+    getPlantObjectAtTile(tile){
+        return this.plantMap.get(tile);
+    }
+
+    // Empty tile by removing plant
     emptyTile(tile){
         this.occupiedTiles.splice(this.occupiedTiles.indexOf(tile), 1);
     }
 
+    // Return if tile is occupied or not
     getTileStatus(tile){
         if (this.occupiedTiles.includes(tile)){
             console.log("Tile occupied");

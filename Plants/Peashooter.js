@@ -2,6 +2,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import THREE from "../threejsModule";
 import { Vector3 } from "three/src/Three.js";
 import { Plant } from './Plant.js';
+import { Zombie } from '../Zombies/Zombie.js'
 
 // Name: peashooter; Cost: 100 sun
 class Peashooter extends Plant {
@@ -12,15 +13,38 @@ class Peashooter extends Plant {
         this.peagenerated = false;
         this.shootCooldown = 2000;
         this.lastTimeShot = 0;
-        this.zombie;
+        this.isShooting = false;
         this.health;
         this.availablePeas = [];
         this.pea;
+        this.peaBox;
         this.distanceTo;
         this.minDistance = Infinity;
         this.closestZombie;
         this.intersects;
         this.delay = 0;
+        this.detectionZone = null;
+        this.detectionZoneHelper = null;
+        this.boundingBox = null;
+        this.audioListener = new THREE.AudioListener();
+        this.splatSoundBuffer = null;
+        this.pendingSplatHits = 0;
+        this.splatSoundLoadFailed = false;
+        this.zombiesInRange = [];
+
+        const audioLoader = new THREE.AudioLoader();
+        audioLoader.load('./SoundFiles/splat.mp3', (buffer) => {
+            this.splatSoundBuffer = buffer;
+            const pendingSplatHits = this.pendingSplatHits;
+            this.pendingSplatHits = 0;
+            for (let i = 0; i < pendingSplatHits; i++) {
+                this.playSoundEffect();
+            }
+        }, undefined, (error) => {
+            this.splatSoundLoadFailed = true;
+            this.pendingSplatHits = 0;
+            console.error('Failed to load splat sound:', error);
+        });
     }
 
     setMinDistance(distance){
@@ -63,7 +87,6 @@ class Peashooter extends Plant {
             let boxGeo = new THREE.BoxGeometry(1, 1, 1);
             let material = new THREE.MeshStandardMaterial({color : 0x00ff00});
             let pea = new THREE.Mesh(boxGeo, material);
-            // pea.position.set(this.peashooter.position.x, this.peashooter.position.y + 2, this.peashooter.position.z);
             this.availablePeas.push(pea);
           
         }
@@ -71,14 +94,60 @@ class Peashooter extends Plant {
         return this.availablePeas;
     }
 
+    getBoundingBox() {
+        return this.boundingBox;
+    }
 
-    generateDetectionZone(){
-        const geo = new THREE.BoxGeometry(70 - this.model.position.x, 5, 5);
+    // Generate the detection zone for the peashooter
+    generateDetectionZone(scene, pos){
+
+        const geo = new THREE.BoxGeometry(70 - pos.x, 5, 5);
         const material = new THREE.MeshBasicMaterial({color : 0xffffff});
         const box = new THREE.Mesh(geo, material);
-        box.position.set(this.model.position.x + box.geometry.parameters.width / 2, this.model.position.y, this.model.position.z);
+        this.boundingBox = new THREE.Box3();
 
-        return box;
+        box.position.set(pos.x + box.geometry.parameters.width / 2, pos.y, pos.z);
+        box.visible = false;
+
+        if (globalThis.DEBUG){
+            scene.add(box);
+               
+            const boxHelper = new THREE.BoxHelper(box, 0xffff00);
+            scene.add(boxHelper);
+            boxHelper.update();
+
+            this.detectionZoneHelper = boxHelper;
+        }
+     
+
+        this.boundingBox.setFromObject(box);
+
+        this.detectionZone = box;
+    
+
+    }
+
+    // Remove the detection zone for the peashooter
+    removeDetectionZone(scene){
+        if (!this.detectionZone) {
+            return;
+        }
+
+        scene.remove(this.detectionZone);
+
+        this.detectionZone.geometry.dispose();
+        this.detectionZone.material.dispose();
+
+        if (globalThis.DEBUG) {
+            scene.remove(this.detectionZoneHelper);
+            this.detectionZoneHelper.geometry.dispose();
+            this.detectionZoneHelper.material.dispose();
+            this.detectionZoneHelper = null;
+        }
+     
+        this.detectionZone = null;
+     
+
     }
 
     sleep(ms){
@@ -86,21 +155,28 @@ class Peashooter extends Plant {
     }
 
     playSoundEffect(){
-        const listener = new THREE.AudioListener();
-        const audioloader = new THREE.AudioLoader();
-        const splatSound = new THREE.Audio(listener);
+        if (this.splatSoundLoadFailed) {
+            return;
+        }
 
-        audioloader.load('./SoundFiles/splat.mp3', (buffer) => {
-            splatSound.setBuffer(buffer);
-            splatSound.setLoop(false);
-            splatSound.setVolume(1);
-        });
+        if (!this.splatSoundBuffer) {
+            this.pendingSplatHits++;
+            return;
+        }
 
-        return splatSound.play();
+        const splatSound = new THREE.Audio(this.audioListener);
+        splatSound.setBuffer(this.splatSoundBuffer);
+        splatSound.setLoop(false);
+        splatSound.setVolume(1);
+        splatSound.play();
     }
 
+    // Reduce a zombies health
     reduceZombieHealth(zombie){
-        
+        zombie.reduceHealth(100);
+        console.log("Zombie Health: " + zombie.getHealth());
+
+      
     }
 
     canShoot(){
@@ -108,23 +184,23 @@ class Peashooter extends Plant {
     }
 
     // Detect an intersection between the raycasting an zombie
-    detectIntersection(target){
-        let tar = target.model.getObjectByName('hitbox');
-        const origin = this.model.position;
-        const forward = new THREE.Vector3(1, 0, 0);
+    detectZombie(target){
 
-        this.raycaster.set(origin, forward);
-        this.intersects = this.raycaster.intersectObject(tar);
+        if (target instanceof Zombie){
+              let tar = target.model.getObjectByName('hitbox');
 
-        if (this.intersects.length > 0){
-            return true;
+              this.shootPea();
         } else {
-            return false;
+            return;
         }
+      
+        
+     
+
     }
 
-    getZPosition(){
-        return this.model.position.z;
+    getPosition(){
+        return this.model.position;
     }
 
     setDelay(delay){
@@ -135,60 +211,99 @@ class Peashooter extends Plant {
         return this.delay;
     }
 
+    // Move pea forward at a constant speed
+    movePea(){
+      
+        // Return pea back to start if it goes out of bounds
+        if (this.pea.position.x >= 90) {
+            this.pea.position.set(this.model.position.x, this.model.position.y + 1.8, this.model.position.z);
+            this.isShooting = false;
+        } else{
+
+             // If pea intersects zombie, reduce zombie health
+            this.zombiesInRange.forEach((zombie) => {
+
+                // Reduce zombie health if pea hits zombie
+                if (zombie.hitbox != null && this.peaBox.intersectsBox(zombie.hitbox)) {
+                    this.reduceZombieHealth(zombie);
+                    this.playSoundEffect();
+                    this.pea.position.set(this.model.position.x, this.model.position.y + 1.8, this.model.position.z);
+                    this.isShooting = false;
+
+                    this.pea.updateMatrixWorld(true, false);
+                    this.peaBox.setFromObject(this.pea);
+                }
+
+                // Remove zombie from array if they are defeated
+                if (zombie.getHealth() <= 0) {
+                    this.zombiesInRange.pop();
+                    console.log(this.zombiesInRange.length);
+                    return;
+                }
+                });
+
+                
+
+            this.pea.position.x += 0.3; // Move pea forward
+
+            this.pea.updateMatrixWorld(true, false);
+            this.peaBox.setFromObject(this.pea);
+        }
+    }
+
+    // Generate pea to be shot
+    generatePea(scene){
+        if (this.availablePeas.length < 1){
+            const geo = new THREE.SphereGeometry(1, 10, 10);
+            const material = new THREE.MeshBasicMaterial({color: '#0cc44f'});
+            this.pea = new THREE.Mesh(geo, material);
+            this.peaBox = new THREE.Box3();
+            this.peaBox.setFromObject(this.pea);
+
+            scene.add(this.pea);
+
+            if (globalThis.DEBUG){
+                const boxHelper = new THREE.Box3Helper(this.peaBox, {color: '#cbd269'} );
+                scene.add(boxHelper);
+            }
+          
+            
+
+            this.pea.position.set(this.model.position.x, this.model.position.y + 1.8, this.model.position.z);
+            this.pea.visible = false;
+            
+            this.availablePeas.push(this.pea);
+        } 
+    }
+
+    // Adds a zombie to be in range
+    addInRangeZombie(zombie) {
+        this.zombiesInRange.push(zombie);
+    }
+
+    // Get zombies in range
+    getZombiesInRange(){
+        return this.zombiesInRange;
+    }
 
     
     // Shoot a pea if a zombie is detected
-    shootPea(target, scene, delay){
-        let zombie = target;
-        let tar = target.model.getObjectByName('hitbox');
-
-        const maxPos = 90;
-        const startPos = this.model.position.x;
+    shootPea(scene){
 
         // Generate the pea if not already
-        if (this.availablePeas.length < 1){
-            const geo = new THREE.SphereGeometry(1, 10, 10);
-            const material = new THREE.MeshBasicMaterial({color : 0x00ff00});
-            this.pea = new THREE.Mesh(geo, material);
-            this.pea.position.set(this.model.position.x + 5, this.model.position.y + 1.8, this.model.position.z);
-            this.pea.visible = false;
-            scene.add(this.pea);
-            this.availablePeas.push(this.pea);
-        } 
+        this.generatePea(scene);
         
-        if (zombie.getHealth() <= 0){
-            this.pea.visible = false;
-            return false;
-        }
-
-        if (!this.pea.visible) {
-            if (!this.canShoot()) {
-                return false;
-            }
-
-            this.pea.position.set(
-                this.model.position.x + 5,
-                this.model.position.y + 1.8,
-                this.model.position.z,
-            );
+        // Shoot pea and set last time shot, otherwise finish shooting
+        if (this.zombiesInRange.length > 0 && this.canShoot()) {
+            this.isShooting = true;
             this.pea.visible = true;
-            this.lastTimeShot = Date.now();
-        }
-            
-        // If the pea goes beyond the max distance, set it back to the original position
-        if (this.pea.position.x >= tar.parent.position.x){
-            this.pea.position.x = startPos;
-            this.pea.visible = false;
-            zombie.reduceHealth(100);
-            return false;
-            
-        } else if (this.pea.position.x < maxPos){
-            this.pea.position.x += 0.3;
-        
+            this.movePea();
+            this.lastTimeShot = Date.now(); // Set last shot for cooldown
+        } else if (this.isShooting) {
+            this.pea.visible = true;
+            this.movePea();
         } else {
-            this.pea.position.x = startPos;
-            this.pea.visible = false;
-            return false;
+            this.isShooting = false;
         }
     }
 }
