@@ -513,6 +513,7 @@
               lawn.emptyTile(clickedObj);
               const plant = lawn.getPlantObjectAtTile(clickedObj);
               scene.remove(plant.model);
+
               if (typeof plant.removeDetectionZone === "function") {
                 plant.removeDetectionZone(scene);
               }
@@ -582,8 +583,7 @@
 
         const delta = clock.getDelta(); // Get the time delta for the frame
 
-        basicZombie.updateZombiePosition();
-
+        // Spawn zombies in set intervals once game starts
         if (gameStarted) {
           zombiesSpawnTime += delta;
           coneheadSpawnTime += delta;
@@ -599,30 +599,44 @@
           }
         }
 
-        for (let i = 0; i < zombies.length; i++) {
-          zombies[i]
+        // Load each zombie and add them to the array of active zombies
+        for (let i = zombies.length - 1; i >= 0; i--) {
+          const zombie = zombies[i];
+          zombie
             .loadZombie(scene)
             .then((updateFn) => {
-              zombieUpdateFns.push(updateFn); // Assign the update function when the promise resolves
+              if (zombie.isAlive) {
+                zombieUpdateFns.push({ zombie, updateFn });
+              }
             })
             .catch((error) => {
               console.error("Error loading the zombie:", error);
             });
 
-          activeZombies.push(zombies[i]);
-          zombies.splice(zombies[i], 1);
+          activeZombies.push(zombie);
+          zombies.splice(i, 1);
         }
 
         // Update every active zombie each frame
-        activeZombies.forEach((zombie) => {
+        for (let i = activeZombies.length - 1; i >= 0; i--) {
+          const zombie = activeZombies[i];
+          if (!zombie.isAlive) {
+            activeZombies.splice(i, 1);
+            continue;
+          }
+
           zombie.updateZombiePosition();
           if (zombie.hitbox != null && zombie.mesh != null) {
             zombie.hitbox.setFromObject(zombie.mesh);
           }
-        });
+        }
 
         // Update each plant every frame
         plantsActive.forEach((plant) => {
+          if (typeof plant.updateHitEffects === "function") {
+            plant.updateHitEffects(delta);
+          }
+
           if (
             plant.getName() === "peashooter" ||
             plant.getName() === "Snowpea"
@@ -677,6 +691,8 @@
         if (raycasting) {
           raycaster.setFromCamera(mouse, camera);
           let intersects = raycaster.intersectObjects(tiles);
+
+          // Highlight selected tile
           for (let i = 0; i < intersects.length; i++) {
             intersects[0].object.material.emissive.setHex(0x505050);
           }
@@ -684,9 +700,16 @@
 
         if (updateAnimation) updateAnimation(delta); // Call the update function if available
 
-        zombieUpdateFns.forEach((updateFn) => {
-          updateFn(delta);
-        });
+        // Apply the zombie update function each frame
+        for (let i = zombieUpdateFns.length - 1; i >= 0; i--) {
+          const zombieAnimation = zombieUpdateFns[i];
+          if (!zombieAnimation.zombie.isAlive) {
+            zombieUpdateFns.splice(i, 1);
+            continue;
+          }
+
+          zombieAnimation.updateFn(delta);
+        }
 
         renderer.render(scene, camera); // Render the scene
       }

@@ -93,7 +93,7 @@ class House {
     generateHouse() {
         this.generateBase();
         this.generateUpperHalf();
-        this.loadFence(); 
+        //this.loadFence(); 
         return this.group;
     }
 }

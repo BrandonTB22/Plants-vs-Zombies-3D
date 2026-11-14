@@ -31,6 +31,7 @@ class Peashooter extends Plant {
         this.pendingSplatHits = 0;
         this.splatSoundLoadFailed = false;
         this.zombiesInRange = [];
+        this.hitEffects = [];
 
         const audioLoader = new THREE.AudioLoader();
         audioLoader.load('./SoundFiles/splat.mp3', (buffer) => {
@@ -174,9 +175,69 @@ class Peashooter extends Plant {
     // Reduce a zombies health
     reduceZombieHealth(zombie){
         zombie.reduceHealth(100);
-        console.log("Zombie Health: " + zombie.getHealth());
+        console.log("Zombie Health: " + zombie.getHealth());      
+    }
 
-      
+    createHitEffect(scene, position) {
+        const geometry = new THREE.SphereGeometry(0.35, 8, 8);
+        const material = new THREE.MeshBasicMaterial({
+            color: 0x9cff36,
+            transparent: true,
+            opacity: 1,
+            depthWrite: false,
+        });
+        const group = new THREE.Group();
+        const particles = [];
+        const particleCount = 8;
+
+        for (let i = 0; i < particleCount; i++) {
+            const angle = (i / particleCount) * Math.PI * 2;
+            const particle = new THREE.Mesh(geometry, material);
+            particle.position.set(position.x, position.y + 5, position.z);
+            particle.scale.setScalar(1 + Math.random());
+            group.add(particle);
+            particles.push({
+                mesh: particle,
+                velocity: new THREE.Vector3(
+                    Math.cos(angle) * 4,
+                    1 + Math.random() * 3,
+                    Math.sin(angle) * 3,
+                ),
+            });
+        }
+
+        scene.add(group);
+        this.hitEffects.push({
+            scene,
+            group,
+            geometry,
+            material,
+            particles,
+            age: 0,
+            duration: 0.3,
+        });
+    }
+
+    updateHitEffects(delta) {
+        for (let i = this.hitEffects.length - 1; i >= 0; i--) {
+            const effect = this.hitEffects[i];
+            effect.age += delta;
+            const progress = Math.min(effect.age / effect.duration, 1);
+
+            effect.particles.forEach(({ mesh, velocity }) => {
+                mesh.position.addScaledVector(velocity, delta);
+                velocity.y -= 8 * delta;
+                mesh.scale.setScalar(mesh.scale.x * (1 - delta * 2));
+            });
+            effect.material.opacity = 1 - progress;
+
+            if (progress >= 1) {
+                effect.scene.remove(effect.group);
+                effect.geometry.dispose();
+                effect.material.dispose();
+                this.hitEffects.splice(i, 1);
+            }
+        }
     }
 
     canShoot(){
@@ -193,10 +254,6 @@ class Peashooter extends Plant {
         } else {
             return;
         }
-      
-        
-     
-
     }
 
     getPosition(){
@@ -212,12 +269,16 @@ class Peashooter extends Plant {
     }
 
     // Move pea forward at a constant speed
-    movePea(){
+    movePea(scene){
+
+        // Add pea to the scene
+        scene.add(this.pea);
       
         // Return pea back to start if it goes out of bounds
         if (this.pea.position.x >= 90) {
             this.pea.position.set(this.model.position.x, this.model.position.y + 1.8, this.model.position.z);
             this.isShooting = false;
+            scene.remove(this.pea);
         } else{
 
              // If pea intersects zombie, reduce zombie health
@@ -225,6 +286,8 @@ class Peashooter extends Plant {
 
                 // Reduce zombie health if pea hits zombie
                 if (zombie.hitbox != null && this.peaBox.intersectsBox(zombie.hitbox)) {
+                    scene.remove(this.pea);
+                    this.createHitEffect(scene, zombie.hitbox.getCenter(new Vector3()));
                     this.reduceZombieHealth(zombie);
                     this.playSoundEffect();
                     this.pea.position.set(this.model.position.x, this.model.position.y + 1.8, this.model.position.z);
@@ -278,7 +341,9 @@ class Peashooter extends Plant {
 
     // Adds a zombie to be in range
     addInRangeZombie(zombie) {
-        this.zombiesInRange.push(zombie);
+        if (zombie.isAlive && !this.zombiesInRange.includes(zombie)) {
+            this.zombiesInRange.push(zombie);
+        }
     }
 
     // Get zombies in range
@@ -289,6 +354,7 @@ class Peashooter extends Plant {
     
     // Shoot a pea if a zombie is detected
     shootPea(scene){
+        this.zombiesInRange = this.zombiesInRange.filter((zombie) => zombie.isAlive);
 
         // Generate the pea if not already
         this.generatePea(scene);
@@ -297,11 +363,11 @@ class Peashooter extends Plant {
         if (this.zombiesInRange.length > 0 && this.canShoot()) {
             this.isShooting = true;
             this.pea.visible = true;
-            this.movePea();
+            this.movePea(scene);
             this.lastTimeShot = Date.now(); // Set last shot for cooldown
         } else if (this.isShooting) {
             this.pea.visible = true;
-            this.movePea();
+            this.movePea(scene);
         } else {
             this.isShooting = false;
         }

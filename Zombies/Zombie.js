@@ -67,7 +67,11 @@ export class Zombie {
                     action.play();
 
                     // Add animation update function to the zombie's userData
-                    zombie.userData.updateAnimation = (delta) => mixer.update(delta);
+                    zombie.userData.updateAnimation = (delta) => {
+                        if (this.isAlive) {
+                            mixer.update(delta);
+                        }
+                    };
 
                     // Resolve the promise with the update function for animations
                     resolve(zombie.userData.updateAnimation);
@@ -186,20 +190,51 @@ export class Zombie {
     // Update the zombie to progress forward
     updateZombiePosition(){
 
-        if (this.model != null && this.hitbox != null) {
+        if (this.isAlive && this.model != null && this.hitbox != null) {
             this.model.updateWorldMatrix(true, true);    
             this.model.position.x -= 0.010;
         
         }
     }
 
+    // Reduce zombie health by an ammount
     reduceHealth(ammount){
+        if (!this.isAlive) {
+            return;
+        }
+
         this.health -= ammount;
-    }
 
-    // Plays zombie's death animation
-    playDeathAnimation() {
+        // Remove zombie once defeated
+        if (this.health <= 0) {
+            this.isAlive = false;
 
+            if (this.model) {
+                if (this.scene) {
+                    this.scene.remove(this.model);
+                }
+
+                this.model.traverse((object) => {
+                    if (object.geometry) {
+                        object.geometry.dispose();
+                    }
+
+                    if (object.material) {
+                        const materials = Array.isArray(object.material)
+                            ? object.material
+                            : [object.material];
+                        materials.forEach((material) => material.dispose());
+                    }
+                });
+                this.model.clear();
+            }
+
+            this.model = null;
+            this.mesh = null;
+            this.hitbox = null;
+            this.boundingBox = null;
+            this.scene = null;
+        }
     }
 
     // Return the zombie's current health
@@ -224,8 +259,6 @@ export class Zombie {
         this.hitbox.setFromObject(this.mesh);
 
         this.hitbox.name = "hitbox";
-       
-       
     }
 
     getBoundingBox() {
