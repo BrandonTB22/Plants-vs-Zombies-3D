@@ -1,5 +1,6 @@
 
 // Load models
+import THREE from "./threejsModule";
 import { BasicZombie } from "./Zombies/BasicZombie";
 import { ConeHeadZombie } from "./Zombies/ConeHeadZombie";
 
@@ -13,6 +14,8 @@ class GameLogic{
         this.scene =scene;
         this.lawn = lawn;
         this.camera = camera;
+        this.audioLoader = new THREE.AudioLoader();
+        this.listener = new THREE.AudioListener();
 
     }
 
@@ -69,6 +72,23 @@ class GameLogic{
             this.transfer.push(conehead);
             this.zombiesActive.push(conehead)
         }
+    }
+
+    // Ends game when condtion is met
+    endGame(camera){
+        console.log("GAME OVER!");
+
+        camera.add(this.listener);
+
+        this.audioLoader.load("./SoundFiles/loseMusic.mp3", (buffer) => {
+            const loseSound = new THREE.Audio(this.listener);
+            loseSound.setBuffer(buffer);
+            loseSound.setLoop(false);
+            loseSound.setVolume(1.0);
+            loseSound.play();
+        });
+
+        
     }
 
 }

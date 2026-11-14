@@ -9,7 +9,7 @@
   <body>
     <div id="gui">
       <div id="sunEnergy">
-        <h3 id="sunText">500</h3>
+        <h3 id="sunText">50</h3>
       </div>
       <div id="plantSlots">
         <!-- Plant slots -->
@@ -32,6 +32,10 @@
     </div>
 
     <canvas id="myCanvas"></canvas>
+
+    <div id="game-over-screen" role="alert" style="display: none">
+      <img src="./assets/game_over_screen.jpg" alt="Game Over" />
+    </div>
 
     <script type="module">
       // Include all of the imports needed
@@ -120,6 +124,13 @@
         const text = document.getElementById("sunText");
 
         text.textContent = text.textContent - amount;
+      }
+
+      function flashInsufficientSun() {
+        const sunText = document.getElementById("sunText");
+        sunText.classList.remove("sun-insufficient-flash");
+        void sunText.offsetWidth;
+        sunText.classList.add("sun-insufficient-flash");
       }
 
       // What will handle the game
@@ -233,8 +244,8 @@
               } else {
                 console.log("You don't have enough sun!");
                 raycasting = false;
-
                 buzzer.play();
+                flashInsufficientSun();
               }
               break;
 
@@ -282,6 +293,7 @@
               } else {
                 buzzer.play();
                 raycasting = false;
+                flashInsufficientSun();
               }
               break;
 
@@ -333,10 +345,18 @@
               } else {
                 buzzer.play();
                 raycasting = false;
+                flashInsufficientSun();
               }
               break;
 
             case 4:
+              if (parseInt(text.textContent) < 100) {
+                buzzer.play();
+                raycasting = false;
+                flashInsufficientSun();
+                break;
+              }
+
               // Repeater selection logic
               let repeater;
               seedSelect.play();
@@ -401,6 +421,7 @@
 
       // Handle the start button being clicked
       const menu = document.getElementById("menu_screen");
+      const gameOverScreen = document.getElementById("game-over-screen");
 
       startButton.addEventListener("click", () => {
         menu.remove();
@@ -597,120 +618,129 @@
             game.spawnConeHeads();
             coneheadSpawnTime = 0;
           }
-        }
 
-        // Load each zombie and add them to the array of active zombies
-        for (let i = zombies.length - 1; i >= 0; i--) {
-          const zombie = zombies[i];
-          zombie
-            .loadZombie(scene)
-            .then((updateFn) => {
-              if (zombie.isAlive) {
-                zombieUpdateFns.push({ zombie, updateFn });
+          // Load each zombie and add them to the array of active zombies
+          for (let i = zombies.length - 1; i >= 0; i--) {
+            const zombie = zombies[i];
+            zombie
+              .loadZombie(scene)
+              .then((updateFn) => {
+                if (zombie.isAlive) {
+                  zombieUpdateFns.push({ zombie, updateFn });
+                }
+              })
+              .catch((error) => {
+                console.error("Error loading the zombie:", error);
+              });
+
+            activeZombies.push(zombie);
+            zombies.splice(i, 1);
+          }
+
+          // Update every active zombie each frame
+          for (let i = activeZombies.length - 1; i >= 0; i--) {
+            const zombie = activeZombies[i];
+            if (!zombie.isAlive) {
+              activeZombies.splice(i, 1);
+              continue;
+            }
+
+            zombie.updateZombiePosition();
+
+            // End the game if a zombie reaches the house
+
+            if (zombie.hitbox != null && zombie.mesh != null) {
+              zombie.hitbox.setFromObject(zombie.mesh);
+
+              if (gameStarted && zombie.model.position.x <= -10) {
+                game.endGame(camera);
+                levelMusic.stop();
+                gameStarted = false;
+                gameOverScreen.style.display = "flex";
               }
-            })
-            .catch((error) => {
-              console.error("Error loading the zombie:", error);
-            });
-
-          activeZombies.push(zombie);
-          zombies.splice(i, 1);
-        }
-
-        // Update every active zombie each frame
-        for (let i = activeZombies.length - 1; i >= 0; i--) {
-          const zombie = activeZombies[i];
-          if (!zombie.isAlive) {
-            activeZombies.splice(i, 1);
-            continue;
+            }
           }
 
-          zombie.updateZombiePosition();
-          if (zombie.hitbox != null && zombie.mesh != null) {
-            zombie.hitbox.setFromObject(zombie.mesh);
-          }
-        }
+          // Update each plant every frame
+          plantsActive.forEach((plant) => {
+            if (typeof plant.updateHitEffects === "function") {
+              plant.updateHitEffects(delta);
+            }
 
-        // Update each plant every frame
-        plantsActive.forEach((plant) => {
-          if (typeof plant.updateHitEffects === "function") {
-            plant.updateHitEffects(delta);
-          }
-
-          if (
-            plant.getName() === "peashooter" ||
-            plant.getName() === "Snowpea"
-          ) {
-            if (activeZombies.length > 0) {
-              try {
-                // Peashooter case
-                if (plant.getName() === "peashooter") {
-                  for (let i = 0; i < activeZombies.length; i++) {
-                    if (
-                      activeZombies[i].hitbox != null &&
-                      plant.boundingBox != null
-                    ) {
+            if (
+              plant.getName() === "peashooter" ||
+              plant.getName() === "Snowpea"
+            ) {
+              if (activeZombies.length > 0) {
+                try {
+                  // Peashooter case
+                  if (plant.getName() === "peashooter") {
+                    for (let i = 0; i < activeZombies.length; i++) {
                       if (
-                        plant.boundingBox.intersectsBox(
-                          activeZombies[i].hitbox,
-                        ) &&
-                        !plant.getZombiesInRange().includes(activeZombies[i])
+                        activeZombies[i].hitbox != null &&
+                        plant.boundingBox != null
                       ) {
-                        plant.addInRangeZombie(activeZombies[i]);
+                        if (
+                          plant.boundingBox.intersectsBox(
+                            activeZombies[i].hitbox,
+                          ) &&
+                          !plant.getZombiesInRange().includes(activeZombies[i])
+                        ) {
+                          plant.addInRangeZombie(activeZombies[i]);
+                        }
                       }
                     }
+                    plant.shootPea(scene);
                   }
-                  plant.shootPea(scene);
+                } catch (error) {
+                  console.error("Error processing plants: ", error);
                 }
-              } catch (error) {
-                console.error("Error processing plants: ", error);
+              } else {
               }
-            } else {
+            }
+
+            // Sunflower case
+            if (plant.getName() == "sunflower") {
+              elapsedTimed += delta;
+
+              // Give sun every 18 seconds
+              if (elapsedTimed >= 18) {
+                scene.add(plant.giveSun());
+
+                elapsedTimed = 0;
+              }
+            }
+          });
+
+          // Set tile to normal color unless raycasting
+          tiles.forEach((tile) => {
+            tile.material.emissive.setHex(0x000000);
+          });
+
+          // Raycasting, set tile to highlight
+          if (raycasting) {
+            raycaster.setFromCamera(mouse, camera);
+            let intersects = raycaster.intersectObjects(tiles);
+
+            // Highlight selected tile
+            for (let i = 0; i < intersects.length; i++) {
+              intersects[0].object.material.emissive.setHex(0x505050);
             }
           }
 
-          // Sunflower case
-          if (plant.getName() == "sunflower") {
-            elapsedTimed += delta;
+          if (updateAnimation) updateAnimation(delta); // Call the update function if available
 
-            // Give sun every 18 seconds
-            if (elapsedTimed >= 18) {
-              scene.add(plant.giveSun());
-
-              elapsedTimed = 0;
+          // Apply the zombie update function each frame
+          for (let i = zombieUpdateFns.length - 1; i >= 0; i--) {
+            const zombieAnimation = zombieUpdateFns[i];
+            if (!zombieAnimation.zombie.isAlive) {
+              zombieUpdateFns.splice(i, 1);
+              continue;
             }
-          }
-        });
 
-        // Set tile to normal color unless raycasting
-        tiles.forEach((tile) => {
-          tile.material.emissive.setHex(0x000000);
-        });
-
-        // Raycasting, set tile to highlight
-        if (raycasting) {
-          raycaster.setFromCamera(mouse, camera);
-          let intersects = raycaster.intersectObjects(tiles);
-
-          // Highlight selected tile
-          for (let i = 0; i < intersects.length; i++) {
-            intersects[0].object.material.emissive.setHex(0x505050);
+            zombieAnimation.updateFn(delta);
           }
         }
-
-        if (updateAnimation) updateAnimation(delta); // Call the update function if available
-
-        // Apply the zombie update function each frame
-        for (let i = zombieUpdateFns.length - 1; i >= 0; i--) {
-          const zombieAnimation = zombieUpdateFns[i];
-          if (!zombieAnimation.zombie.isAlive) {
-            zombieUpdateFns.splice(i, 1);
-            continue;
-          }
-
-          zombieAnimation.updateFn(delta);
-        }
-
         renderer.render(scene, camera); // Render the scene
       }
 

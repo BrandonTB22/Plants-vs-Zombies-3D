@@ -190,10 +190,10 @@ export class Zombie {
     // Update the zombie to progress forward
     updateZombiePosition(){
 
+        // Update zombie position to walk forward, ensuring model exists
         if (this.isAlive && this.model != null && this.hitbox != null) {
             this.model.updateWorldMatrix(true, true);    
             this.model.position.x -= 0.010;
-        
         }
     }
 
